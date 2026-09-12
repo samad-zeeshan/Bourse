@@ -1,0 +1,24 @@
+# Build and test the engine, then the Python flow and evaluation code. No step asserts a latency number.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  engine:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+      - run: cargo build --release --workspace
+      - run: cargo test --release --workspace

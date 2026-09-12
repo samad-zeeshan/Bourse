@@ -1,0 +1,9 @@
+# Keep text files LF in the repo and the working tree so hashes of text outputs match across machines.
+* text=auto eol=lf
+
+*.bin binary
+*.gif binary
+*.png binary
+*.mp4 binary
+*.wasm binary
+*.gz binary

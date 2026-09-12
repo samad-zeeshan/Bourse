@@ -1,0 +1,23 @@
+# Cargo build output
+target/
+
+# Local Python environment and bytecode
+.venv/
+__pycache__/
+.pytest_cache/
+
+# Raw market data is large and stays under Binance's terms, so only the recorder and small derived files are committed
+data/raw/
+
+# TLC's jar download and its scratch state
+spec/.tools/
+spec/states/
+spec/*_TTrace_*
+
+# Fuzz scratch cases. The log under fuzz/logs/ is committed.
+fuzz/scratch/
+
+# OS noise
+.DS_Store
+Thumbs.db
+desktop.ini
