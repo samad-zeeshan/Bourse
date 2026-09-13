@@ -7,3 +7,8 @@ version.workspace = true
 [dependencies]
 
 [dev-dependencies]
+proptest = "1"
+
+[[test]]
+name = "property"
+path = "../tests/property/vs_python.rs"
