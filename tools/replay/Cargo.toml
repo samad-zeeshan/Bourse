@@ -1,0 +1,9 @@
+[package]
+name = "replay"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+bourse = { path = "../../engine" }
+sha2 = "0.10"
