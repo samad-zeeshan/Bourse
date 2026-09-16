@@ -1,0 +1,38 @@
+{
+  "seed": 20260926,
+  "commands": 5000000,
+  "input_sha256": "24be375b948e92fd279983d8b9abbf93898982a23551756a0f76d6929fad3919",
+  "output_sha256": "6ac132204312719f8c3bb2e2af17de6240e1ba569cedcb7ef697ad4d9ac75df6",
+  "all_identical": true,
+  "runs": [
+    {
+      "where": "Windows process 1",
+      "mode": "pipeline",
+      "events": 5994939,
+      "sha256": "6ac132204312719f8c3bb2e2af17de6240e1ba569cedcb7ef697ad4d9ac75df6",
+      "bytes": 287757072
+    },
+    {
+      "where": "Windows process 2",
+      "mode": "pipeline",
+      "events": 5994939,
+      "sha256": "6ac132204312719f8c3bb2e2af17de6240e1ba569cedcb7ef697ad4d9ac75df6",
+      "bytes": 287757072
+    },
+    {
+      "where": "Windows process 3",
+      "mode": "direct",
+      "events": 5994939,
+      "sha256": "6ac132204312719f8c3bb2e2af17de6240e1ba569cedcb7ef697ad4d9ac75df6",
+      "bytes": 287757072
+    },
+    {
+      "where": "Linux container (rust:1.98-slim)",
+      "mode": "pipeline",
+      "events": 5994939,
+      "sha256": "6ac132204312719f8c3bb2e2af17de6240e1ba569cedcb7ef697ad4d9ac75df6",
+      "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)"
+    }
+  ],
+  "note": "Separate processes on one Windows laptop plus one Linux container on the same laptop. CI repeats the check on a GitHub Linux runner against output_sha256."
+}

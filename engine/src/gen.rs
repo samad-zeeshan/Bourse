@@ -10,6 +10,7 @@ pub struct FlowGen {
     mid: i64,
     recent: Vec<u64>,
     pos: usize,
+    oldest: usize,
     pub min_price: i64,
     pub levels: i64,
 }
@@ -20,8 +21,9 @@ impl FlowGen {
             rng: seed.max(1),
             next_id: 1,
             mid: min_price + levels / 2,
-            recent: vec![0; 4096],
+            recent: vec![0; 1 << 14],
             pos: 0,
+            oldest: 0,
             min_price,
             levels,
         }
@@ -50,7 +52,16 @@ impl FlowGen {
     }
 
     fn remembered(&mut self) -> u64 {
-        let i = self.below(self.recent.len() as u64) as usize;
+        let mask = self.recent.len() - 1;
+        let held = self.pos.wrapping_sub(self.oldest) & mask;
+        // Once the memory is three quarters full, cancel the oldest order. Without this, orders that
+        // drop out of memory can never be cancelled and the book grows for as long as the run lasts.
+        if held > mask / 4 * 3 {
+            let id = self.recent[self.oldest];
+            self.oldest = (self.oldest + 1) & mask;
+            return id;
+        }
+        let i = (self.oldest + self.below(held.max(1) as u64) as usize) & mask;
         self.recent[i]
     }
 
@@ -62,11 +73,14 @@ impl FlowGen {
         let side = if self.below(2) == 0 { Side::Buy } else { Side::Sell };
         let r = self.below(100);
         let qty = 1 + self.below(10) * self.below(10);
-        if r < 52 {
+        if r < 47 {
             let id = self.next_id;
             self.next_id += 1;
             self.recent[self.pos] = id;
             self.pos = (self.pos + 1) & (self.recent.len() - 1);
+            if self.pos == self.oldest {
+                self.oldest = (self.oldest + 1) & (self.recent.len() - 1);
+            }
             // One add in ten is priced through the touch, so the matcher has real work.
             let aggressive = self.below(10) == 0;
             let off = self.offset();
