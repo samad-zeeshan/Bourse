@@ -22,3 +22,11 @@ jobs:
           python-version: '3.14'
       - run: cargo build --release --workspace
       - run: cargo test --release --workspace
+      # The output hash was recorded on a Windows laptop and a Linux container. This runner is a third machine.
+      - name: determinism against the committed hash
+        run: python eval/determinism.py --check
+      - name: fuzz smoke, two minutes against the Python reference
+        run: cargo run --release -p fuzz -- --hours 0.033 --heartbeat-secs 30 --log fuzz-smoke.log && cat fuzz-smoke.log
+      # Runs the harness end to end and checks the two single-thread runs agree. The numbers are printed, never asserted.
+      - name: benchmark sanity
+        run: cargo run --release -p bench -- --quick

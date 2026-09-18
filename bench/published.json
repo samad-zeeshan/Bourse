@@ -1,0 +1,17 @@
+{
+  "engine": "exchange-core",
+  "source": "https://github.com/exchange-core/exchange-core (README, benchmark table)",
+  "language": "Java",
+  "hardware": "dual Intel Xeon X5690 3.47 GHz, RHEL 7.5, one socket isolated and tickless, network-latency tuned profile",
+  "workload": "one symbol, 3 million messages: 9% GTC orders, 3% IOC, 6% cancels, 82% moves, about 1,000 resting orders over 750 price levels",
+  "measures": "risk checks plus matching, open loop at a fixed offered rate, so queueing delay is included",
+  "rows": [
+    {"rate_per_sec": 1000000, "p50_ns": 500, "p99_ns": 4000, "p999_ns": 22000, "max_ns": 45000},
+    {"rate_per_sec": 5000000, "p50_ns": 1500, "p99_ns": 42000, "p999_ns": 150000, "max_ns": 190000}
+  ],
+  "caveats": [
+    "Their numbers include risk checks and queueing at a fixed rate. Ours time only the matcher call, back to back, with no risk checks.",
+    "Their machine was tuned and isolated. Ours is a laptop with nothing isolated.",
+    "Different workload mix and a CPU about twelve years newer."
+  ]
+}
