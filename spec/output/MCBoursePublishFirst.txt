@@ -1,0 +1,59 @@
+TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)
+Running breadth-first search Model-Checking with fp 34 and seed 168485011975484745 with 1 worker on 12 cores with 7092MB heap and 64MB offheap memory [pid: 27668] (Windows 11 10.0 amd64, Eclipse Adoptium 25.0.2 x86_64, MSBDiskFPSet, DiskStateQueue).
+Starting... (2026-09-26 19:24:33)
+Computing initial states...
+Finished computing initial states: 1 distinct state generated at 2026-09-26 19:24:33.
+Error: Invariant HandoffExact is violated.
+Error: The behavior up to this point is:
+State 1: <Initial predicate>
+/\ done = {}
+/\ tail = 0
+/\ cancelled = <<0, 0, 0>>
+/\ stage = "idle"
+/\ out = <<>>
+/\ filled = <<0, 0, 0>>
+/\ book = [S |-> <<<<>>, <<>>>>, B |-> <<<<>>, <<>>>>]
+/\ ptail = 0
+/\ taken = <<>>
+/\ sent = <<>>
+/\ ring = ( 0 :> [kind |-> "none", id |-> 0, side |-> "B", price |-> 0, qty |-> 0] @@
+  1 :> [kind |-> "none", id |-> 0, side |-> "B", price |-> 0, qty |-> 0] )
+/\ qtyOf = <<0, 0, 0>>
+/\ head = 0
+
+State 2: <PushStart line 71, col 5 to line 80, col 82 of module Bourse>
+/\ done = {}
+/\ tail = 1
+/\ cancelled = <<0, 0, 0>>
+/\ stage = "mid"
+/\ out = <<>>
+/\ filled = <<0, 0, 0>>
+/\ book = [S |-> <<<<>>, <<>>>>, B |-> <<<<>>, <<>>>>]
+/\ ptail = 0
+/\ taken = <<>>
+/\ sent = <<[kind |-> "limit", id |-> 1, side |-> "S", price |-> 1, qty |-> 1]>>
+/\ ring = ( 0 :> [kind |-> "none", id |-> 0, side |-> "B", price |-> 0, qty |-> 0] @@
+  1 :> [kind |-> "none", id |-> 0, side |-> "B", price |-> 0, qty |-> 0] )
+/\ qtyOf = <<0, 0, 0>>
+/\ head = 0
+
+State 3: <Consume line 117, col 5 to line 154, col 51 of module Bourse>
+/\ done = {}
+/\ tail = 1
+/\ cancelled = <<0, 0, 0>>
+/\ stage = "mid"
+/\ out = <<[id |-> 0, price |-> 0, qty |-> 0, maker |-> 0, k |-> "rejected", seq |-> 1]>>
+/\ filled = <<0, 0, 0>>
+/\ book = [S |-> <<<<>>, <<>>>>, B |-> <<<<>>, <<>>>>]
+/\ ptail = 0
+/\ taken = <<[kind |-> "none", id |-> 0, side |-> "B", price |-> 0, qty |-> 0]>>
+/\ sent = <<[kind |-> "limit", id |-> 1, side |-> "S", price |-> 1, qty |-> 1]>>
+/\ ring = ( 0 :> [kind |-> "none", id |-> 0, side |-> "B", price |-> 0, qty |-> 0] @@
+  1 :> [kind |-> "none", id |-> 0, side |-> "B", price |-> 0, qty |-> 0] )
+/\ qtyOf = <<0, 0, 0>>
+/\ head = 1
+
+27 states generated, 27 distinct states found, 24 states left on queue.
+The depth of the complete state graph search is 3.
+The average outdegree of the complete state graph is 24 (minimum is 24, the maximum 24 and the 95th percentile is 24).
+Finished in 00s at (2026-09-26 19:24:33)

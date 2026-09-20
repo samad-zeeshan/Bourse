@@ -30,3 +30,18 @@ jobs:
       # Runs the harness end to end and checks the two single-thread runs agree. The numbers are printed, never asserted.
       - name: benchmark sanity
         run: cargo run --release -p bench -- --quick
+
+  # TLC on the lifecycle and handoff model. Fails unless the real model passes and both planted bugs are caught.
+  spec:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+      - run: python spec/check.py

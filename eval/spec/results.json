@@ -1,0 +1,38 @@
+{
+  "tool": "TLC",
+  "tla2tools_sha256": "936a262061c914694dfd669a543be24573c45d5aa0ff20a8b96b23d01e050e88",
+  "module": "Bourse",
+  "runs": {
+    "MCBourse": {
+      "expect": "pass",
+      "result": "pass",
+      "violated": [],
+      "states_generated": 841345,
+      "distinct_states": 541993,
+      "depth": 16,
+      "trace_length": null
+    },
+    "MCBoursePublishFirst": {
+      "expect": "violation",
+      "result": "violation",
+      "violated": [
+        "HandoffExact"
+      ],
+      "states_generated": 27,
+      "distinct_states": 27,
+      "depth": 3,
+      "trace_length": 3
+    },
+    "MCBourseLifo": {
+      "expect": "violation",
+      "result": "violation",
+      "violated": [
+        "FifoWithinLevel"
+      ],
+      "states_generated": 2532,
+      "distinct_states": 1716,
+      "depth": 7,
+      "trace_length": 7
+    }
+  }
+}

@@ -1,0 +1,129 @@
+TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)
+Running breadth-first search Model-Checking with fp 33 and seed 1189485138141753648 with 1 worker on 12 cores with 7092MB heap and 64MB offheap memory [pid: 25084] (Windows 11 10.0 amd64, Eclipse Adoptium 25.0.2 x86_64, MSBDiskFPSet, DiskStateQueue).
+Starting... (2026-09-26 19:24:33)
+Computing initial states...
+Finished computing initial states: 1 distinct state generated at 2026-09-26 19:24:33.
+Error: Invariant FifoWithinLevel is violated.
+Error: The behavior up to this point is:
+State 1: <Initial predicate>
+/\ done = {}
+/\ tail = 0
+/\ cancelled = <<0, 0, 0>>
+/\ stage = "idle"
+/\ out = <<>>
+/\ filled = <<0, 0, 0>>
+/\ book = [S |-> <<<<>>, <<>>>>, B |-> <<<<>>, <<>>>>]
+/\ ptail = 0
+/\ taken = <<>>
+/\ sent = <<>>
+/\ ring = ( 0 :> [kind |-> "none", id |-> 0, side |-> "B", price |-> 0, qty |-> 0] @@
+  1 :> [kind |-> "none", id |-> 0, side |-> "B", price |-> 0, qty |-> 0] )
+/\ qtyOf = <<0, 0, 0>>
+/\ head = 0
+
+State 2: <PushStart line 71, col 5 to line 80, col 82 of module Bourse>
+/\ done = {}
+/\ tail = 0
+/\ cancelled = <<0, 0, 0>>
+/\ stage = "mid"
+/\ out = <<>>
+/\ filled = <<0, 0, 0>>
+/\ book = [S |-> <<<<>>, <<>>>>, B |-> <<<<>>, <<>>>>]
+/\ ptail = 0
+/\ taken = <<>>
+/\ sent = <<[kind |-> "limit", id |-> 1, side |-> "S", price |-> 1, qty |-> 1]>>
+/\ ring = ( 0 :> [kind |-> "limit", id |-> 1, side |-> "S", price |-> 1, qty |-> 1] @@
+  1 :> [kind |-> "none", id |-> 0, side |-> "B", price |-> 0, qty |-> 0] )
+/\ qtyOf = <<0, 0, 0>>
+/\ head = 0
+
+State 3: <PushFinish line 83, col 5 to line 89, col 81 of module Bourse>
+/\ done = {}
+/\ tail = 1
+/\ cancelled = <<0, 0, 0>>
+/\ stage = "idle"
+/\ out = <<>>
+/\ filled = <<0, 0, 0>>
+/\ book = [S |-> <<<<>>, <<>>>>, B |-> <<<<>>, <<>>>>]
+/\ ptail = 1
+/\ taken = <<>>
+/\ sent = <<[kind |-> "limit", id |-> 1, side |-> "S", price |-> 1, qty |-> 1]>>
+/\ ring = ( 0 :> [kind |-> "limit", id |-> 1, side |-> "S", price |-> 1, qty |-> 1] @@
+  1 :> [kind |-> "none", id |-> 0, side |-> "B", price |-> 0, qty |-> 0] )
+/\ qtyOf = <<0, 0, 0>>
+/\ head = 0
+
+State 4: <PushStart line 71, col 5 to line 80, col 82 of module Bourse>
+/\ done = {}
+/\ tail = 1
+/\ cancelled = <<0, 0, 0>>
+/\ stage = "mid"
+/\ out = <<>>
+/\ filled = <<0, 0, 0>>
+/\ book = [S |-> <<<<>>, <<>>>>, B |-> <<<<>>, <<>>>>]
+/\ ptail = 1
+/\ taken = <<>>
+/\ sent = << [kind |-> "limit", id |-> 1, side |-> "S", price |-> 1, qty |-> 1],
+   [kind |-> "limit", id |-> 2, side |-> "S", price |-> 1, qty |-> 1] >>
+/\ ring = ( 0 :> [kind |-> "limit", id |-> 1, side |-> "S", price |-> 1, qty |-> 1] @@
+  1 :> [kind |-> "limit", id |-> 2, side |-> "S", price |-> 1, qty |-> 1] )
+/\ qtyOf = <<0, 0, 0>>
+/\ head = 0
+
+State 5: <PushFinish line 83, col 5 to line 89, col 81 of module Bourse>
+/\ done = {}
+/\ tail = 2
+/\ cancelled = <<0, 0, 0>>
+/\ stage = "idle"
+/\ out = <<>>
+/\ filled = <<0, 0, 0>>
+/\ book = [S |-> <<<<>>, <<>>>>, B |-> <<<<>>, <<>>>>]
+/\ ptail = 2
+/\ taken = <<>>
+/\ sent = << [kind |-> "limit", id |-> 1, side |-> "S", price |-> 1, qty |-> 1],
+   [kind |-> "limit", id |-> 2, side |-> "S", price |-> 1, qty |-> 1] >>
+/\ ring = ( 0 :> [kind |-> "limit", id |-> 1, side |-> "S", price |-> 1, qty |-> 1] @@
+  1 :> [kind |-> "limit", id |-> 2, side |-> "S", price |-> 1, qty |-> 1] )
+/\ qtyOf = <<0, 0, 0>>
+/\ head = 0
+
+State 6: <Consume line 117, col 5 to line 154, col 51 of module Bourse>
+/\ done = {1}
+/\ tail = 2
+/\ cancelled = <<0, 0, 0>>
+/\ stage = "idle"
+/\ out = <<[id |-> 1, price |-> 0, qty |-> 1, maker |-> 0, k |-> "rested", seq |-> 1]>>
+/\ filled = <<0, 0, 0>>
+/\ book = [S |-> <<<<<<1, 1, 1>>>>, <<>>>>, B |-> <<<<>>, <<>>>>]
+/\ ptail = 2
+/\ taken = <<[kind |-> "limit", id |-> 1, side |-> "S", price |-> 1, qty |-> 1]>>
+/\ sent = << [kind |-> "limit", id |-> 1, side |-> "S", price |-> 1, qty |-> 1],
+   [kind |-> "limit", id |-> 2, side |-> "S", price |-> 1, qty |-> 1] >>
+/\ ring = ( 0 :> [kind |-> "limit", id |-> 1, side |-> "S", price |-> 1, qty |-> 1] @@
+  1 :> [kind |-> "limit", id |-> 2, side |-> "S", price |-> 1, qty |-> 1] )
+/\ qtyOf = <<1, 0, 0>>
+/\ head = 1
+
+State 7: <Consume line 117, col 5 to line 154, col 51 of module Bourse>
+/\ done = {1, 2}
+/\ tail = 2
+/\ cancelled = <<0, 0, 0>>
+/\ stage = "idle"
+/\ out = << [id |-> 1, price |-> 0, qty |-> 1, maker |-> 0, k |-> "rested", seq |-> 1],
+   [id |-> 2, price |-> 0, qty |-> 1, maker |-> 0, k |-> "rested", seq |-> 2] >>
+/\ filled = <<0, 0, 0>>
+/\ book = [S |-> <<<<<<2, 1, 2>>, <<1, 1, 1>>>>, <<>>>>, B |-> <<<<>>, <<>>>>]
+/\ ptail = 2
+/\ taken = << [kind |-> "limit", id |-> 1, side |-> "S", price |-> 1, qty |-> 1],
+   [kind |-> "limit", id |-> 2, side |-> "S", price |-> 1, qty |-> 1] >>
+/\ sent = << [kind |-> "limit", id |-> 1, side |-> "S", price |-> 1, qty |-> 1],
+   [kind |-> "limit", id |-> 2, side |-> "S", price |-> 1, qty |-> 1] >>
+/\ ring = ( 0 :> [kind |-> "limit", id |-> 1, side |-> "S", price |-> 1, qty |-> 1] @@
+  1 :> [kind |-> "limit", id |-> 2, side |-> "S", price |-> 1, qty |-> 1] )
+/\ qtyOf = <<1, 1, 0>>
+/\ head = 2
+
+2532 states generated, 1716 distinct states found, 417 states left on queue.
+The depth of the complete state graph search is 7.
+The average outdegree of the complete state graph is 1 (minimum is 0, the maximum 24 and the 95th percentile is 2).
+Finished in 00s at (2026-09-26 19:24:34)
