@@ -74,6 +74,11 @@ fn run(a: &Args) {
     let mut text = a.path("--text").map(|p| BufWriter::new(fs::File::create(p).unwrap()));
     let mut depth_out = a.path("--depth-out").map(|p| BufWriter::new(fs::File::create(p).unwrap()));
     let depth: usize = a.num("--depth", 10);
+    // Command indices after which to dump depth. Without it, --depth-out dumps after every command.
+    let depth_at: Option<Vec<usize>> = a.path("--depth-at").map(|p| {
+        fs::read_to_string(p).unwrap().split_whitespace().map(|v| v.parse().unwrap()).collect()
+    });
+    let mut next_dump = 0usize;
     let mode = a.get("--mode").unwrap_or(if depth_out.is_some() { "direct" } else { "pipeline" });
     let mut hash = Sha256::new();
     let mut rec = [0u8; EVENT_BYTES];
@@ -104,7 +109,17 @@ fn run(a: &Args) {
                     write(e);
                 }
                 n += buf.len() as u64;
-                if let Some(d) = depth_out.as_mut() {
+                let due = match &depth_at {
+                    None => true,
+                    Some(at) => {
+                        let hit = next_dump < at.len() && at[next_dump] == i;
+                        while next_dump < at.len() && at[next_dump] <= i {
+                            next_dump += 1;
+                        }
+                        hit
+                    }
+                };
+                if let (Some(d), true) = (depth_out.as_mut(), due) {
                     let nb = book.depth(Side::Buy, &mut bids);
                     let na = book.depth(Side::Sell, &mut asks);
                     let fmt = |v: &[(i64, u64)]| v.iter().map(|(p, q)| format!("{p}:{q}")).collect::<Vec<_>>().join(" ");
@@ -132,7 +147,7 @@ fn main() {
         Some("gen") => gen(&a),
         Some("run") => run(&a),
         _ => {
-            eprintln!("usage: replay gen --seed S --n N --out FILE | replay run --in FILE --out FILE [--text FILE] [--mode pipeline|direct] [--depth-out FILE]");
+            eprintln!("usage: replay gen --seed S --n N --out FILE | replay run --in FILE --out FILE [--text FILE] [--mode pipeline|direct] [--depth-out FILE [--depth N] [--depth-at FILE]]");
             std::process::exit(2);
         }
     }
