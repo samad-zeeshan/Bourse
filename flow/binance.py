@@ -20,6 +20,9 @@ TICK = 0.01
 LOT = 0.0001
 
 
+DAYS_DEFAULT = [f"2026-09-{d:02d}" for d in range(18, 25)]
+
+
 def ticks(price):
     return int(round(float(price) / TICK))
 

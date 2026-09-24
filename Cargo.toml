@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["engine", "tools/replay", "bench", "fuzz"]
+members = ["engine", "tools/replay", "bench", "fuzz", "sim"]
 
 [workspace.package]
 edition = "2021"
