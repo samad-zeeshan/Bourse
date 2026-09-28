@@ -1,0 +1,865 @@
+{
+  "symbol": "ETHUSDT",
+  "days": [
+    "2026-09-18",
+    "2026-09-19",
+    "2026-09-20",
+    "2026-09-21",
+    "2026-09-22",
+    "2026-09-23",
+    "2026-09-24"
+  ],
+  "hours_per_test_day": 24,
+  "quote_size_eth": 0.1,
+  "inventory_cap_eth": 1.0,
+  "fee_bps": 0.0,
+  "folds": [
+    {
+      "test_day": "2026-09-21",
+      "train_days": [
+        "2026-09-18",
+        "2026-09-19",
+        "2026-09-20"
+      ],
+      "validation_day": "2026-09-20",
+      "chosen": {
+        "avellaneda_stoikov": "gamma=0.01 k=0.211 tau=60",
+        "multi_level": "d0=24 step=3 levels=2 skew=0.5",
+        "rl_adversarial": "checkpoint 180",
+        "leaky_oracle": "future five seconds, weight 1"
+      },
+      "seconds": 59.5
+    },
+    {
+      "test_day": "2026-09-22",
+      "train_days": [
+        "2026-09-18",
+        "2026-09-19",
+        "2026-09-20",
+        "2026-09-21"
+      ],
+      "validation_day": "2026-09-21",
+      "chosen": {
+        "avellaneda_stoikov": "gamma=0.01 k=0.209 tau=60",
+        "multi_level": "d0=24 step=3 levels=2 skew=0.5",
+        "rl_adversarial": "checkpoint 170",
+        "leaky_oracle": "future five seconds, weight 1"
+      },
+      "seconds": 105.1
+    },
+    {
+      "test_day": "2026-09-23",
+      "train_days": [
+        "2026-09-18",
+        "2026-09-19",
+        "2026-09-20",
+        "2026-09-21",
+        "2026-09-22"
+      ],
+      "validation_day": "2026-09-22",
+      "chosen": {
+        "avellaneda_stoikov": "gamma=0.01 k=0.419 tau=60",
+        "multi_level": "d0=24 step=3 levels=2 skew=0.5",
+        "rl_adversarial": "checkpoint 200",
+        "leaky_oracle": "future five seconds, weight 1"
+      },
+      "seconds": 89.6
+    },
+    {
+      "test_day": "2026-09-24",
+      "train_days": [
+        "2026-09-18",
+        "2026-09-19",
+        "2026-09-20",
+        "2026-09-21",
+        "2026-09-22",
+        "2026-09-23"
+      ],
+      "validation_day": "2026-09-23",
+      "chosen": {
+        "avellaneda_stoikov": "gamma=0.01 k=0.416 tau=60",
+        "multi_level": "d0=24 step=3 levels=2 skew=0.5",
+        "rl_adversarial": "checkpoint 200",
+        "leaky_oracle": "future five seconds, weight 1"
+      },
+      "seconds": 99.2
+    }
+  ],
+  "strategies": {
+    "avellaneda_stoikov": {
+      "name": "Avellaneda-Stoikov",
+      "chosen_by_fold": [
+        "gamma=0.01 k=0.211 tau=60",
+        "gamma=0.01 k=0.209 tau=60",
+        "gamma=0.01 k=0.419 tau=60",
+        "gamma=0.01 k=0.416 tau=60"
+      ],
+      "oos": {
+        "episodes": 96,
+        "pnl_per_hour": -3.234210447916682,
+        "pnl_per_hour_ci95": [
+          -4.8132462932291356,
+          -1.9286410007812653
+        ],
+        "total_pnl": -310.48420300000146,
+        "sharpe_hourly": -0.5784088293852893,
+        "sharpe_hourly_ci95": [
+          -0.7555316160763228,
+          -0.47616330248010724
+        ],
+        "mean_abs_inventory_eth": 0.006662008969907408,
+        "mean_abs_inventory_ci95": [
+          0.004816274782986114,
+          0.008718490950520838
+        ],
+        "fills_per_hour": 118.5625,
+        "pnl_per_hour_by_day": [
+          -8.204263291666665,
+          -1.6043013333334117,
+          -2.053889666666652,
+          -1.0743875000000003
+        ],
+        "pnl_per_hour_with_1bp_fee": -4.830219301439405,
+        "cumulative_pnl": [
+          -32.278,
+          -47.66,
+          -53.783,
+          -55.809,
+          -56.365,
+          -58.039,
+          -60.316,
+          -61.237,
+          -83.011,
+          -105.434,
+          -108.477,
+          -109.946,
+          -113.102,
+          -126.164,
+          -141.316,
+          -152.721,
+          -163.74,
+          -167.622,
+          -170.033,
+          -178.381,
+          -189.423,
+          -192.369,
+          -195.348,
+          -196.902,
+          -198.947,
+          -201.655,
+          -201.808,
+          -203.703,
+          -204.427,
+          -205.196,
+          -205.839,
+          -206.6,
+          -207.199,
+          -209.327,
+          -209.513,
+          -210.095,
+          -210.713,
+          -213.664,
+          -218.514,
+          -220.032,
+          -221.553,
+          -224.182,
+          -225.85,
+          -227.514,
+          -228.497,
+          -229.658,
+          -232.109,
+          -235.406,
+          -236.11,
+          -236.574,
+          -236.574,
+          -238.037,
+          -238.651,
+          -238.897,
+          -239.21,
+          -240.452,
+          -242.46,
+          -244.837,
+          -245.694,
+          -247.451,
+          -249.012,
+          -251.415,
+          -275.228,
+          -276.948,
+          -280.779,
+          -281.389,
+          -281.389,
+          -281.522,
+          -281.594,
+          -282.685,
+          -284.699,
+          -284.699,
+          -284.759,
+          -285.737,
+          -286.193,
+          -286.52,
+          -286.787,
+          -287.924,
+          -288.068,
+          -288.696,
+          -290.451,
+          -293.197,
+          -296.075,
+          -296.748,
+          -297.093,
+          -297.908,
+          -300.956,
+          -301.922,
+          -306.042,
+          -307.166,
+          -308.536,
+          -309.08,
+          -309.524,
+          -310.014,
+          -310.185,
+          -310.484
+        ]
+      },
+      "minerva": {
+        "score": 20.0,
+        "raw": -0.6,
+        "seal": false,
+        "components": {
+          "deflated_sharpe": {
+            "value": 0.0,
+            "threshold": 0.95,
+            "pass": false,
+            "margin": -18.999999999999996
+          },
+          "overfitting_probability": {
+            "value": 0.0,
+            "threshold": 0.5,
+            "pass": true,
+            "margin": 1.0
+          },
+          "superior_predictive_ability_p": {
+            "value": 1.0,
+            "threshold": 0.05,
+            "pass": false,
+            "margin": -18.999999999999996
+          },
+          "min_track_record_hours": {
+            "value": null,
+            "threshold": 96,
+            "pass": false,
+            "margin": -1.0
+          },
+          "regime_stability": {
+            "value": 0.0,
+            "threshold": 0.75,
+            "pass": false,
+            "margin": -3.0
+          }
+        },
+        "deflation_benchmark_sharpe": 1.7651177232586546
+      },
+      "referee": {
+        "max_evalue": 1.0,
+        "p_anytime": 1.0,
+        "p_after_search": 1.0,
+        "scale": 11.275982414686723
+      },
+      "leakage": {
+        "moments": 100,
+        "differing": 0,
+        "verdict": "clean"
+      }
+    },
+    "multi_level": {
+      "name": "Multi-level",
+      "chosen_by_fold": [
+        "d0=24 step=3 levels=2 skew=0.5",
+        "d0=24 step=3 levels=2 skew=0.5",
+        "d0=24 step=3 levels=2 skew=0.5",
+        "d0=24 step=3 levels=2 skew=0.5"
+      ],
+      "oos": {
+        "episodes": 96,
+        "pnl_per_hour": -27.63912236458381,
+        "pnl_per_hour_ci95": [
+          -34.46329802786497,
+          -21.57867877812641
+        ],
+        "total_pnl": -2653.3557470000455,
+        "sharpe_hourly": -1.0895521054777124,
+        "sharpe_hourly_ci95": [
+          -1.3164954202476635,
+          -0.9513473639721839
+        ],
+        "mean_abs_inventory_eth": 0.4657565043402778,
+        "mean_abs_inventory_ci95": [
+          0.4534458760054977,
+          0.47804240416666666
+        ],
+        "fills_per_hour": 1613.8333333333333,
+        "pnl_per_hour_by_day": [
+          -43.88494883333243,
+          -21.413226958332984,
+          -22.593409458334396,
+          -22.664904208335418
+        ],
+        "pnl_per_hour_with_1bp_fee": -52.16795959589347,
+        "cumulative_pnl": [
+          -115.576,
+          -215.074,
+          -235.134,
+          -254.713,
+          -274.923,
+          -291.214,
+          -322.912,
+          -342.193,
+          -422.839,
+          -481.199,
+          -500.915,
+          -509.615,
+          -547.778,
+          -626.397,
+          -724.708,
+          -790.384,
+          -850.928,
+          -881.683,
+          -900.177,
+          -933.55,
+          -984.725,
+          -1010.189,
+          -1033.768,
+          -1053.239,
+          -1088.894,
+          -1132.691,
+          -1156.257,
+          -1179.2,
+          -1191.494,
+          -1227.583,
+          -1235.407,
+          -1244.136,
+          -1272.744,
+          -1304.873,
+          -1313.687,
+          -1328.501,
+          -1336.903,
+          -1386.502,
+          -1444.589,
+          -1469.956,
+          -1488.596,
+          -1495.75,
+          -1499.751,
+          -1519.825,
+          -1526.72,
+          -1524.682,
+          -1550.676,
+          -1567.156,
+          -1578.331,
+          -1613.788,
+          -1625.665,
+          -1651.78,
+          -1673.891,
+          -1694.257,
+          -1697.438,
+          -1711.283,
+          -1729.736,
+          -1731.236,
+          -1743.818,
+          -1761.155,
+          -1785.429,
+          -1805.778,
+          -1931.927,
+          -1962.485,
+          -2010.864,
+          -2041.946,
+          -2053.647,
+          -2064.196,
+          -2074.141,
+          -2077.788,
+          -2110.099,
+          -2109.398,
+          -2122.118,
+          -2133.643,
+          -2151.092,
+          -2164.479,
+          -2170.881,
+          -2198.266,
+          -2199.319,
+          -2207.452,
+          -2241.324,
+          -2278.927,
+          -2303.188,
+          -2305.74,
+          -2316.92,
+          -2364.601,
+          -2440.602,
+          -2467.741,
+          -2554.923,
+          -2574.867,
+          -2602.09,
+          -2619.741,
+          -2632.159,
+          -2637.505,
+          -2646.763,
+          -2653.356
+        ]
+      },
+      "minerva": {
+        "score": 20.0,
+        "raw": -0.6,
+        "seal": false,
+        "components": {
+          "deflated_sharpe": {
+            "value": 1.5624986167797004e-283,
+            "threshold": 0.95,
+            "pass": false,
+            "margin": -18.999999999999996
+          },
+          "overfitting_probability": {
+            "value": 0.0,
+            "threshold": 0.5,
+            "pass": true,
+            "margin": 1.0
+          },
+          "superior_predictive_ability_p": {
+            "value": 1.0,
+            "threshold": 0.05,
+            "pass": false,
+            "margin": -18.999999999999996
+          },
+          "min_track_record_hours": {
+            "value": null,
+            "threshold": 96,
+            "pass": false,
+            "margin": -1.0
+          },
+          "regime_stability": {
+            "value": 0.0,
+            "threshold": 0.75,
+            "pass": false,
+            "margin": -3.0
+          }
+        },
+        "deflation_benchmark_sharpe": 1.7651177232586546
+      },
+      "referee": {
+        "max_evalue": 1.0,
+        "p_anytime": 1.0,
+        "p_after_search": 1.0,
+        "scale": 73.43436297744711
+      },
+      "leakage": {
+        "moments": 100,
+        "differing": 0,
+        "verdict": "clean"
+      }
+    },
+    "rl_adversarial": {
+      "name": "RL candidate",
+      "chosen_by_fold": [
+        "checkpoint 180",
+        "checkpoint 170",
+        "checkpoint 200",
+        "checkpoint 200"
+      ],
+      "oos": {
+        "episodes": 96,
+        "pnl_per_hour": -5.884358562501544,
+        "pnl_per_hour_ci95": [
+          -8.91562411979326,
+          -3.028338779167419
+        ],
+        "total_pnl": -564.8984220001482,
+        "sharpe_hourly": -0.4246701589699252,
+        "sharpe_hourly_ci95": [
+          -0.6219436607354291,
+          -0.24672877260619203
+        ],
+        "mean_abs_inventory_eth": 0.9741404693287037,
+        "mean_abs_inventory_ci95": [
+          0.9709716829571758,
+          0.977123259555845
+        ],
+        "fills_per_hour": 314.8854166666667,
+        "pnl_per_hour_by_day": [
+          -14.645570291669832,
+          -3.1038934583335442,
+          -2.6207264583342185,
+          -3.167244041668584
+        ],
+        "pnl_per_hour_with_1bp_fee": -10.354809418216137,
+        "cumulative_pnl": [
+          -67.045,
+          -47.949,
+          -63.846,
+          -68.627,
+          -68.087,
+          -71.254,
+          -69.259,
+          -70.982,
+          -120.274,
+          -162.227,
+          -164.185,
+          -176.411,
+          -192.137,
+          -208.226,
+          -227.029,
+          -256.403,
+          -266.449,
+          -260.713,
+          -280.658,
+          -292.906,
+          -322.944,
+          -340.968,
+          -353.925,
+          -351.494,
+          -341.584,
+          -342.654,
+          -339.281,
+          -342.484,
+          -334.768,
+          -359.477,
+          -356.82,
+          -354.167,
+          -377.504,
+          -384.082,
+          -376.251,
+          -377.547,
+          -392.237,
+          -403.847,
+          -404.19,
+          -409.634,
+          -415.222,
+          -414.61,
+          -415.569,
+          -417.818,
+          -420.016,
+          -415.886,
+          -422.903,
+          -425.987,
+          -421.155,
+          -417.106,
+          -409.617,
+          -401.274,
+          -410.646,
+          -432.837,
+          -434.714,
+          -448.08,
+          -442.783,
+          -442.215,
+          -446.936,
+          -439.017,
+          -436.852,
+          -444.386,
+          -441.251,
+          -422.361,
+          -442.321,
+          -453.966,
+          -457.253,
+          -467.364,
+          -476.206,
+          -471.462,
+          -485.286,
+          -488.885,
+          -486.708,
+          -481.363,
+          -494.562,
+          -485.647,
+          -493.591,
+          -494.915,
+          -498.06,
+          -507.062,
+          -486.269,
+          -466.545,
+          -474.145,
+          -473.218,
+          -477.428,
+          -500.37,
+          -498.049,
+          -530.073,
+          -544.206,
+          -534.627,
+          -558.765,
+          -567.425,
+          -562.197,
+          -560.608,
+          -561.962,
+          -564.898
+        ]
+      },
+      "minerva": {
+        "score": 20.0,
+        "raw": -0.6,
+        "seal": false,
+        "components": {
+          "deflated_sharpe": {
+            "value": 1.5165401218607117e-146,
+            "threshold": 0.95,
+            "pass": false,
+            "margin": -18.999999999999996
+          },
+          "overfitting_probability": {
+            "value": 0.0,
+            "threshold": 0.5,
+            "pass": true,
+            "margin": 1.0
+          },
+          "superior_predictive_ability_p": {
+            "value": 1.0,
+            "threshold": 0.05,
+            "pass": false,
+            "margin": -18.999999999999996
+          },
+          "min_track_record_hours": {
+            "value": null,
+            "threshold": 96,
+            "pass": false,
+            "margin": -1.0
+          },
+          "regime_stability": {
+            "value": 0.0,
+            "threshold": 0.75,
+            "pass": false,
+            "margin": -3.0
+          }
+        },
+        "deflation_benchmark_sharpe": 1.7651177232586546
+      },
+      "referee": {
+        "max_evalue": 1.0,
+        "p_anytime": 1.0,
+        "p_after_search": 1.0,
+        "scale": 59.0000856459185
+      },
+      "leakage": {
+        "moments": 100,
+        "differing": 0,
+        "verdict": "clean"
+      }
+    },
+    "leaky_oracle": {
+      "name": "Planted cheat",
+      "chosen_by_fold": [
+        "future five seconds, weight 1",
+        "future five seconds, weight 1",
+        "future five seconds, weight 1",
+        "future five seconds, weight 1"
+      ],
+      "oos": {
+        "episodes": 96,
+        "pnl_per_hour": 8.361520020832602,
+        "pnl_per_hour_ci95": [
+          6.056741452603473,
+          10.999942981769985
+        ],
+        "total_pnl": 802.7059219999297,
+        "sharpe_hourly": 0.9024900987371971,
+        "sharpe_hourly_ci95": [
+          0.7591677523820194,
+          1.0950810929352395
+        ],
+        "mean_abs_inventory_eth": 0.3025045784143518,
+        "mean_abs_inventory_ci95": [
+          0.28353483804976853,
+          0.3233769695891204
+        ],
+        "fills_per_hour": 877.5729166666666,
+        "pnl_per_hour_by_day": [
+          12.685200749998863,
+          7.295741624998968,
+          6.9451115833340085,
+          6.520026124998566
+        ],
+        "pnl_per_hour_with_1bp_fee": -3.9811217912647785,
+        "cumulative_pnl": [
+          16.749,
+          36.859,
+          48.058,
+          55.389,
+          52.58,
+          55.946,
+          65.034,
+          69.068,
+          80.74,
+          124.768,
+          139.248,
+          144.953,
+          164.581,
+          206.528,
+          226.637,
+          244.931,
+          265.039,
+          275.479,
+          281.124,
+          296.206,
+          303.982,
+          293.044,
+          300.595,
+          304.445,
+          311.97,
+          323.694,
+          325.944,
+          333.321,
+          338.021,
+          345.041,
+          352.32,
+          356.554,
+          368.813,
+          372.158,
+          372.035,
+          376.791,
+          380.217,
+          391.154,
+          426.229,
+          440.057,
+          458.785,
+          464.85,
+          469.546,
+          478.638,
+          479.477,
+          481.315,
+          472.708,
+          479.543,
+          479.593,
+          485.295,
+          490.671,
+          492.653,
+          489.56,
+          500.528,
+          503.3,
+          509.502,
+          513.982,
+          516.806,
+          520.787,
+          531.591,
+          533.043,
+          543.986,
+          573.358,
+          584.858,
+          613.064,
+          633.112,
+          640.224,
+          645.886,
+          646.504,
+          647.612,
+          644.348,
+          646.225,
+          647.337,
+          651.039,
+          656.765,
+          657.761,
+          658.92,
+          669.092,
+          676.124,
+          681.935,
+          704.021,
+          727.72,
+          730.112,
+          731.335,
+          733.427,
+          748.225,
+          749.166,
+          768.515,
+          772.329,
+          780.66,
+          785.197,
+          792.748,
+          796.271,
+          797.05,
+          802.301,
+          802.706
+        ]
+      },
+      "minerva": {
+        "score": 59.7,
+        "raw": 0.19303912466024717,
+        "seal": false,
+        "components": {
+          "deflated_sharpe": {
+            "value": 6.551312644934077e-24,
+            "threshold": 0.95,
+            "pass": false,
+            "margin": -18.999999999999996
+          },
+          "overfitting_probability": {
+            "value": null,
+            "threshold": 0.5,
+            "pass": false,
+            "margin": -1.0
+          },
+          "superior_predictive_ability_p": {
+            "value": 0.0,
+            "threshold": 0.05,
+            "pass": true,
+            "margin": 1.0
+          },
+          "min_track_record_hours": {
+            "value": 3.341220163081364,
+            "threshold": 96,
+            "pass": true,
+            "margin": 0.9651956233012359
+          },
+          "regime_stability": {
+            "value": 1.0,
+            "threshold": 0.75,
+            "pass": true,
+            "margin": 1.0
+          }
+        },
+        "deflation_benchmark_sharpe": 1.7651177232586546
+      },
+      "referee": {
+        "max_evalue": 294319.1323776369,
+        "p_anytime": 3.3976724242205005e-06,
+        "p_after_search": 0.001345478279991318,
+        "scale": 25.169732075563708
+      },
+      "leakage": {
+        "moments": 100,
+        "differing": 93,
+        "verdict": "reads the future"
+      }
+    }
+  },
+  "comparisons": {
+    "rl_adversarial_minus_avellaneda_stoikov": {
+      "mean_per_hour": -2.6501481145848627,
+      "ci95": [
+        -4.856024136980302,
+        -0.32959397760588993
+      ],
+      "max_evalue": 1.0,
+      "p_anytime": 1.0,
+      "p_after_search": 1.0
+    },
+    "rl_adversarial_minus_multi_level": {
+      "mean_per_hour": 21.754763802082266,
+      "ci95": [
+        16.67160444348909,
+        27.406024128644596
+      ],
+      "max_evalue": 1186.1008762126967,
+      "p_anytime": 0.0008430986099538769,
+      "p_after_search": 0.33386704954173524
+    }
+  },
+  "register": {
+    "entries": 412,
+    "validation_trials": 396,
+    "hypotheses_submitted": 6,
+    "by_family": {
+      "avellaneda_stoikov": 124,
+      "multi_level": 196,
+      "rl_adversarial": 84,
+      "leaky_oracle": 8
+    }
+  },
+  "verdict": {
+    "candidate_beats_avellaneda_stoikov": false,
+    "certified_strategies": []
+  },
+  "rl_cut": {
+    "policy": "linear over five features and inventory, 13 numbers",
+    "training": "evolution strategies, 200 iterations, 16 antithetic pairs, 8 episodes of 15 minutes",
+    "adversary": "best response over 8 fixed regimes each iteration, not a learned network",
+    "no_lstm": true
+  }
+}
