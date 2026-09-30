@@ -1,0 +1,197 @@
+{
+  "schema_version": 1,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "The life of one order",
+    "viewBox": [
+      1030,
+      630
+    ],
+    "quality_profile": "showcase"
+  },
+  "lanes": [
+    {
+      "id": "main",
+      "label": "Main path"
+    },
+    {
+      "id": "side",
+      "label": "Changes and other endings"
+    }
+  ],
+  "states": [
+    {
+      "id": "received",
+      "type": "start",
+      "label": "Received",
+      "sublabel": "numbered on arrival",
+      "lane": "main",
+      "col": 0,
+      "step": "01"
+    },
+    {
+      "id": "checked",
+      "type": "decision",
+      "label": "Checked",
+      "sublabel": "size, price, id",
+      "lane": "main",
+      "col": 1,
+      "step": "02"
+    },
+    {
+      "id": "matching",
+      "type": "active",
+      "label": "Matching",
+      "sublabel": "best price, oldest first",
+      "lane": "main",
+      "col": 2,
+      "step": "03"
+    },
+    {
+      "id": "resting",
+      "type": "waiting",
+      "label": "Resting",
+      "sublabel": "remainder waits",
+      "lane": "main",
+      "col": 3,
+      "step": "04"
+    },
+    {
+      "id": "filled",
+      "type": "success",
+      "label": "Filled",
+      "sublabel": "hit in its turn",
+      "lane": "main",
+      "col": 4,
+      "step": "05"
+    },
+    {
+      "id": "replaced",
+      "type": "neutral",
+      "label": "Replaced",
+      "sublabel": "new price or more size",
+      "lane": "side",
+      "col": 2,
+      "tag": "back of queue"
+    },
+    {
+      "id": "rejected",
+      "type": "failure",
+      "label": "Rejected",
+      "sublabel": "bad or duplicate",
+      "lane": "side",
+      "col": 0
+    },
+    {
+      "id": "cancelled",
+      "type": "failure",
+      "label": "Cancelled",
+      "sublabel": "user, IOC or no liquidity",
+      "lane": "side",
+      "col": 1
+    }
+  ],
+  "transitions": [
+    {
+      "from": "received",
+      "to": "checked",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left",
+      "route": "straight"
+    },
+    {
+      "from": "checked",
+      "to": "matching",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left",
+      "route": "straight"
+    },
+    {
+      "from": "matching",
+      "to": "resting",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left",
+      "route": "straight"
+    },
+    {
+      "from": "resting",
+      "to": "filled",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left",
+      "route": "straight"
+    },
+    {
+      "from": "checked",
+      "to": "rejected",
+      "label": "invalid",
+      "variant": "security"
+    },
+    {
+      "from": "matching",
+      "to": "cancelled",
+      "label": "may not rest",
+      "variant": "security"
+    },
+    {
+      "from": "resting",
+      "to": "cancelled",
+      "label": "cancel",
+      "variant": "security",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "route": "straight",
+      "labelDy": 24
+    },
+    {
+      "from": "resting",
+      "to": "replaced",
+      "variant": "default"
+    },
+    {
+      "from": "replaced",
+      "to": "matching",
+      "label": "re-enters",
+      "variant": "dashed",
+      "fromSide": "right",
+      "toSide": "top",
+      "via": [
+        [
+          810,
+          307
+        ],
+        [
+          810,
+          96
+        ],
+        [
+          402,
+          96
+        ]
+      ],
+      "labelAt": [
+        606,
+        96
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Keeps its place",
+      "items": [
+        "Cutting size at the same price keeps the order's place in the queue"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Loses its place",
+      "items": [
+        "A new price or a bigger size sends it to the back, as if new"
+      ]
+    }
+  ]
+}

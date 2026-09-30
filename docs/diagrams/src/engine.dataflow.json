@@ -1,0 +1,181 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "How an order moves through the engine",
+    "viewBox": [
+      1080,
+      430
+    ],
+    "quality_profile": "showcase",
+    "legend": {
+      "entries": {
+        "emphasis": {
+          "label": "order path"
+        },
+        "security": {
+          "label": "check"
+        },
+        "default": {
+          "label": "side step"
+        },
+        "database": {
+          "label": "state"
+        }
+      }
+    }
+  },
+  "stages": [
+    {
+      "label": "Source"
+    },
+    {
+      "label": "Hand-off"
+    },
+    {
+      "label": "Matching"
+    },
+    {
+      "label": "Hand-off"
+    },
+    {
+      "label": "Output"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "recorded",
+      "type": "external",
+      "label": "Recorded orders",
+      "stage": 0,
+      "row": 0,
+      "width": 150
+    },
+    {
+      "id": "reader",
+      "type": "frontend",
+      "label": "Reader thread",
+      "stage": 0,
+      "row": 1,
+      "width": 150
+    },
+    {
+      "id": "inring",
+      "type": "messagebus",
+      "label": "Input ring",
+      "stage": 1,
+      "row": 1
+    },
+    {
+      "id": "book",
+      "type": "database",
+      "label": "Order book",
+      "stage": 2,
+      "row": 0
+    },
+    {
+      "id": "matcher",
+      "type": "backend",
+      "label": "Matcher",
+      "stage": 2,
+      "row": 1
+    },
+    {
+      "id": "outring",
+      "type": "messagebus",
+      "label": "Event ring",
+      "stage": 3,
+      "row": 1
+    },
+    {
+      "id": "writer",
+      "type": "frontend",
+      "label": "Writer thread",
+      "stage": 4,
+      "row": 1,
+      "width": 150
+    },
+    {
+      "id": "hash",
+      "type": "security",
+      "label": "Output hash",
+      "stage": 4,
+      "row": 0
+    }
+  ],
+  "flows": [
+    {
+      "from": "recorded",
+      "to": "reader",
+      "label": "orders",
+      "variant": "default",
+      "route": "vertical-channel"
+    },
+    {
+      "from": "reader",
+      "to": "inring",
+      "label": "push",
+      "variant": "emphasis",
+      "route": "straight"
+    },
+    {
+      "from": "inring",
+      "to": "matcher",
+      "label": "pop",
+      "variant": "emphasis",
+      "route": "straight"
+    },
+    {
+      "from": "matcher",
+      "to": "book",
+      "label": "match or rest",
+      "variant": "default",
+      "route": "vertical-channel"
+    },
+    {
+      "from": "matcher",
+      "to": "outring",
+      "label": "events",
+      "variant": "emphasis",
+      "route": "straight"
+    },
+    {
+      "from": "outring",
+      "to": "writer",
+      "label": "drain",
+      "variant": "emphasis",
+      "route": "straight"
+    },
+    {
+      "from": "writer",
+      "to": "hash",
+      "label": "sha-256",
+      "variant": "security",
+      "route": "vertical-channel"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "One matcher thread",
+      "items": [
+        "Only one thread ever touches the book, so the output order depends only on the input order"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Rings without locks",
+      "items": [
+        "Fixed slots, no memory requests, nothing to wait on"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Checked two ways",
+      "items": [
+        "The output hash is the same on every run",
+        "Depth snapshots are compared with Binance's own"
+      ]
+    }
+  ]
+}

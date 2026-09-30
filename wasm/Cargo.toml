@@ -1,0 +1,12 @@
+[package]
+name = "bourse-wasm"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+bourse = { path = "../engine" }
+wasm-bindgen = "=0.2.104"

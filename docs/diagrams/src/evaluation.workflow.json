@@ -1,0 +1,212 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "How each strategy is judged",
+    "quality_profile": "showcase",
+    "legend": {
+      "entries": {
+        "frontend": {
+          "label": "test run"
+        },
+        "backend": {
+          "label": "step"
+        },
+        "security": {
+          "label": "judge"
+        },
+        "database": {
+          "label": "record"
+        },
+        "external": {
+          "label": "result"
+        }
+      }
+    }
+  },
+  "lanes": [
+    {
+      "id": "past",
+      "label": "Earlier days only"
+    },
+    {
+      "id": "next",
+      "label": "The next day, once"
+    },
+    {
+      "id": "judge",
+      "label": "Judges",
+      "variant": "exception"
+    }
+  ],
+  "phases": [
+    {
+      "id": "prepare",
+      "label": "Tune and train",
+      "fromCol": 0,
+      "toCol": 2
+    },
+    {
+      "id": "test",
+      "label": "Test",
+      "fromCol": 3,
+      "toCol": 3,
+      "variant": "emphasis"
+    },
+    {
+      "id": "judgement",
+      "label": "Judge",
+      "fromCol": 4,
+      "toCol": 5,
+      "variant": "dashed"
+    }
+  ],
+  "mainPath": [
+    "days",
+    "train",
+    "pick",
+    "testday",
+    "leak",
+    "referee",
+    "verdict"
+  ],
+  "nodes": [
+    {
+      "id": "days",
+      "lane": "past",
+      "col": 0,
+      "type": "database",
+      "label": "Earlier days",
+      "sublabel": "real trades",
+      "width": 132
+    },
+    {
+      "id": "train",
+      "lane": "past",
+      "col": 1,
+      "type": "backend",
+      "label": "Tune and train",
+      "sublabel": "grids, RL vs adversary",
+      "width": 132
+    },
+    {
+      "id": "pick",
+      "lane": "past",
+      "col": 2,
+      "type": "backend",
+      "label": "Pick one each",
+      "sublabel": "on the last day",
+      "width": 132
+    },
+    {
+      "id": "register",
+      "lane": "judge",
+      "col": 2,
+      "type": "database",
+      "label": "Register",
+      "sublabel": "the referee counts it",
+      "width": 132
+    },
+    {
+      "id": "testday",
+      "lane": "next",
+      "col": 3,
+      "type": "frontend",
+      "label": "Test day",
+      "sublabel": "24 one-hour runs",
+      "width": 132
+    },
+    {
+      "id": "leak",
+      "lane": "judge",
+      "col": 4,
+      "type": "security",
+      "label": "Leakage guard",
+      "sublabel": "rewrite the future",
+      "width": 132
+    },
+    {
+      "id": "referee",
+      "lane": "judge",
+      "col": 5,
+      "type": "security",
+      "label": "Referee",
+      "sublabel": "bets on new results",
+      "width": 132
+    },
+    {
+      "id": "verdict",
+      "lane": "next",
+      "col": 5,
+      "type": "external",
+      "label": "Verdict",
+      "sublabel": "passed or not",
+      "width": 132
+    }
+  ],
+  "edges": [
+    {
+      "id": "days-train",
+      "from": "days",
+      "to": "train",
+      "variant": "default"
+    },
+    {
+      "id": "train-pick",
+      "from": "train",
+      "to": "pick",
+      "variant": "default"
+    },
+    {
+      "id": "train-register",
+      "from": "train",
+      "to": "register",
+      "label": "logged",
+      "variant": "dashed",
+      "role": "branch"
+    },
+    {
+      "id": "pick-test",
+      "from": "pick",
+      "to": "testday",
+      "label": "frozen",
+      "variant": "emphasis"
+    },
+    {
+      "id": "test-leak",
+      "from": "testday",
+      "to": "leak",
+      "variant": "security"
+    },
+    {
+      "id": "leak-referee",
+      "from": "leak",
+      "to": "referee",
+      "label": "clean only",
+      "variant": "security"
+    },
+    {
+      "id": "referee-verdict",
+      "from": "referee",
+      "to": "verdict",
+      "variant": "emphasis"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "Four rounds",
+      "items": [
+        "Each round trains on the days before a test day and tests on that day once"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Two separate judges",
+      "items": [
+        "The guard catches strategies that peek ahead",
+        "The referee discounts luck by how many settings were tried"
+      ]
+    }
+  ]
+}
