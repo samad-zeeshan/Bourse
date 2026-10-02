@@ -45,3 +45,15 @@ jobs:
         with:
           python-version: '3.14'
       - run: python spec/check.py
+
+  # Python tests for the flow, market making and statistics code, then the README drift gate.
+  python:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+      - run: pip install -r requirements.txt
+      - run: python -m pytest -q flow/tests mm/tests eval/mm/tests eval/tests

@@ -1,0 +1,18 @@
+1790435837 START commit=767ade1 hours=24 seed=20260926 heartbeat_secs=600 reference=tests/property/reference_book.py
+1790436437 HEARTBEAT elapsed_s=600 cases=75331 commands=46884600 events=52385586 violations=0 reference_diffs=0 pipeline_checks=753 tight=37629 flow=22678 edges=15024
+1790437037 HEARTBEAT elapsed_s=1200 cases=150966 commands=93897496 events=104918389 violations=0 reference_diffs=0 pipeline_checks=1509 tight=75531 flow=45303 edges=30132
+1790437637 HEARTBEAT elapsed_s=1800 cases=231473 commands=143792111 events=160658601 violations=0 reference_diffs=0 pipeline_checks=2314 tight=115574 flow=69369 edges=46530
+1790438237 HEARTBEAT elapsed_s=2400 cases=312392 commands=193913852 events=216656683 violations=0 reference_diffs=0 pipeline_checks=3123 tight=155979 flow=93845 edges=62568
+1790438837 HEARTBEAT elapsed_s=3000 cases=392309 commands=243630110 events=272191330 violations=0 reference_diffs=0 pipeline_checks=3923 tight=195923 flow=117858 edges=78528
+1790439437 HEARTBEAT elapsed_s=3600 cases=472859 commands=293488421 events=327903242 violations=0 reference_diffs=0 pipeline_checks=4728 tight=236071 flow=141995 edges=94793
+1790440037 HEARTBEAT elapsed_s=4200 cases=548489 commands=340723508 events=380675210 violations=0 reference_diffs=0 pipeline_checks=5484 tight=273737 flow=164859 edges=109893
+1790440637 HEARTBEAT elapsed_s=4800 cases=623781 commands=387510687 events=432949743 violations=0 reference_diffs=0 pipeline_checks=6237 tight=311594 flow=187372 edges=124815
+1790441237 HEARTBEAT elapsed_s=5400 cases=699010 commands=434189533 events=485103343 violations=0 reference_diffs=0 pipeline_checks=6990 tight=349048 flow=209941 edges=140021
+1790441837 HEARTBEAT elapsed_s=6000 cases=776684 commands=482313190 events=538880593 violations=0 reference_diffs=0 pipeline_checks=7766 tight=387926 flow=233056 edges=155702
+1790442437 HEARTBEAT elapsed_s=6600 cases=853840 commands=529932347 events=592091819 violations=0 reference_diffs=0 pipeline_checks=8538 tight=426681 flow=256203 edges=170956
+1790443037 HEARTBEAT elapsed_s=7200 cases=903595 commands=560865229 events=626654606 violations=0 reference_diffs=0 pipeline_checks=9035 tight=451590 flow=271097 edges=180908
+1790443637 HEARTBEAT elapsed_s=7800 cases=958690 commands=594925575 events=664712932 violations=0 reference_diffs=0 pipeline_checks=9586 tight=479084 flow=287525 edges=192081
+1790444237 HEARTBEAT elapsed_s=8400 cases=1006372 commands=624743983 events=698030746 violations=0 reference_diffs=0 pipeline_checks=10063 tight=502862 flow=301919 edges=201591
+1790444837 HEARTBEAT elapsed_s=9000 cases=1063001 commands=659697437 events=737090429 violations=0 reference_diffs=0 pipeline_checks=10630 tight=531194 flow=318809 edges=212998
+1790445437 HEARTBEAT elapsed_s=9600 cases=1122794 commands=696784771 events=778526196 violations=0 reference_diffs=0 pipeline_checks=11227 tight=561232 flow=336741 edges=224821
+1790446037 HEARTBEAT elapsed_s=10200 cases=1192412 commands=740078791 events=826900798 violations=0 reference_diffs=0 pipeline_checks=11924 tight=596139 flow=357621 edges=238652
