@@ -172,7 +172,7 @@ function showLatency() {
   const L = R.latency, edges = L.hist.edges_ns, counts = L.hist.counts;
   readout.innerHTML = `orders timed <b>${r2(L.samples / 1e6)} million</b>`;
   caption.textContent = `Half of all orders were handled in ${L.p50} nanoseconds or less, and 99 in 100 in ${L.p99} or less. ` +
-    `The goal was one microsecond, so this is well inside it. It was measured on a ${L.cpu.replace(" 6-Core Processor", "")} laptop with nothing isolated, so treat it as a guide.`;
+    `The goal was one microsecond, so this is well inside it. It was measured on a ${L.cpu.replace(" 6-Core Processor", "")} Windows PC with nothing isolated, so treat it as a guide.`;
   clear();
   const x0 = 50, x1 = W - 20, y0 = H - 40, y1 = 20;
   const lo = Math.log2(edges[0]), hi = Math.log2(edges[edges.length - 1]);

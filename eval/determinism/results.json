@@ -34,5 +34,5 @@
       "toolchain": "rustc 1.98.1 (48a229cea 2026-09-01)"
     }
   ],
-  "note": "Separate processes on one Windows laptop plus one Linux container on the same laptop. CI repeats the check on a GitHub Linux runner against output_sha256."
+  "note": "Separate processes on one Windows PC plus one Linux container on the same PC. CI repeats the check on a GitHub Linux runner against output_sha256."
 }

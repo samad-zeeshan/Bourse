@@ -58,9 +58,9 @@ def speed(b, pub, meth):
     p = b["per_order"]
     rows = ["| Engine | Machine | Median | 99th percentile | 99.9th percentile | Slowest | Orders per second |",
             "|---|---|---|---|---|---|---|",
-            f"| Bourse, matcher alone | {meth['cpu'].replace(' 6-Core Processor', '')}, laptop | {p['p50_ns']} ns | {p['p99_ns']} ns | "
+            f"| Bourse, matcher alone | {meth['cpu'].replace(' 6-Core Processor', '')}, Windows PC | {p['p50_ns']} ns | {p['p99_ns']} ns | "
             f"{p['p999_ns']} ns | {n(p['max_ns'] / 1000, 1)} µs | {n(b['single_thread_orders_per_sec'] / 1e6, 0)} million |",
-            f"| Bourse, three threads with rings | same | | | | | {n(b['pipeline_orders_per_sec'] / 1e6, 0)} million |"]
+            f"| Bourse, three threads with queues | same | | | | | {n(b['pipeline_orders_per_sec'] / 1e6, 0)} million |"]
     for row in pub["rows"]:
         rows.append(f"| {pub['engine']} at {n(row['rate_per_sec'] / 1e6, 0)} million a second | Xeon X5690, tuned server | "
                     f"{n(row['p50_ns'] / 1000, 1)} µs | {n(row['p99_ns'] / 1000, 0)} µs | {n(row['p999_ns'] / 1000, 0)} µs | "

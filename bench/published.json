@@ -11,7 +11,7 @@
   ],
   "caveats": [
     "Their numbers include risk checks and queueing at a fixed rate. Ours time only the matcher call, back to back, with no risk checks.",
-    "Their machine was tuned and isolated. Ours is a laptop with nothing isolated.",
+    "Their machine was tuned and isolated. Ours is a Windows PC with nothing isolated.",
     "Different workload mix and a CPU about twelve years newer."
   ]
 }

@@ -8,7 +8,7 @@
   "matcher_cpu": 4,
   "pinned": true,
   "thread_priority": "time critical",
-  "core_isolation": "none, a Windows laptop with the usual background services running",
+  "core_isolation": "none, a Windows PC with the usual background services running",
   "perf_counters": "not used, Linux perf does not exist on Windows",
   "workload": "seeded synthetic flow: about 47% limit adds near the touch with one in ten priced through it, 43% cancels, 5% market orders, 5% replaces",
   "warm_up_orders": 2000000,

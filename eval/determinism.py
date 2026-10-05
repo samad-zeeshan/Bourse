@@ -47,7 +47,7 @@ def local_runs(tmp):
 
 def docker_run():
     # Same seed and code, built by a Linux toolchain inside a container. Same physical CPU, different OS,
-    # compiler target and C library, which is as close to a second machine as this laptop gets.
+    # compiler target and C library, which is as close to a second machine as this PC gets.
     script = (f"cargo build -q --release -p replay --target-dir /tmp/t && "
               f"/tmp/t/release/replay gen --seed {SEED} --n {N} --out /tmp/flow.bin && "
               f"/tmp/t/release/replay run --in /tmp/flow.bin --out /tmp/ev.bin && sha256sum /tmp/flow.bin /tmp/ev.bin && "
@@ -84,7 +84,7 @@ def main():
         "seed": SEED, "commands": N, "input_sha256": flow_sha,
         "output_sha256": runs[0]["sha256"], "all_identical": len(hashes) == 1,
         "runs": runs,
-        "note": "Separate processes on one Windows laptop plus one Linux container on the same laptop. "
+        "note": "Separate processes on one Windows PC plus one Linux container on the same PC. "
                 "CI repeats the check on a GitHub Linux runner against output_sha256.",
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)

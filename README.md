@@ -19,8 +19,8 @@ Each has an interactive version beside it in `docs/diagrams/`.
 <!-- gen:speed -->
 | Engine | Machine | Median | 99th percentile | 99.9th percentile | Slowest | Orders per second |
 |---|---|---|---|---|---|---|
-| Bourse, matcher alone | AMD Ryzen 5 7600X3D, laptop | 40 ns | 180 ns | 280 ns | 54.4 µs | 42 million |
-| Bourse, three threads with rings | same | | | | | 25 million |
+| Bourse, matcher alone | AMD Ryzen 5 7600X3D, Windows PC | 40 ns | 180 ns | 280 ns | 54.4 µs | 42 million |
+| Bourse, three threads with queues | same | | | | | 25 million |
 | exchange-core at 1 million a second | Xeon X5690, tuned server | 0.5 µs | 4 µs | 22 µs | 45 µs | published |
 | exchange-core at 5 million a second | Xeon X5690, tuned server | 1.5 µs | 42 µs | 150 µs | 190 µs | published |
 <!-- /gen -->
@@ -50,7 +50,7 @@ The engine promises five things after every order: the best buying price stays b
 | Check | What it tried | Result |
 |---|---|---|
 | Property tests against the Python reference book | 3,000 random order streams per run | all match |
-| Differential fuzzing against the same reference | 2.8 hours, 0.74 billion orders | 0 disagreements or broken rules |
+| Differential fuzzing against the same reference | 3.3 hours, 0.89 billion orders | 0 disagreements or broken rules |
 | TLA+ model of the order life and the hand-off | 541,993 distinct states | no rule broken |
 | Same model, tail published before the slot is written | planted bug | caught (HandoffExact) |
 | Same model, new orders put at the front | planted bug | caught (FifoWithinLevel) |
@@ -58,7 +58,7 @@ The engine promises five things after every order: the best buying price stays b
 <!-- /gen -->
 
 <!-- gen:fuzz-summary -->
-The 24-hour fuzz run is still running. So far it has checked 0.74 billion orders over 2.8 hours. It found 0 problems.
+The 24-hour fuzz run is still running. So far it has checked 0.89 billion orders over 3.3 hours. It found 0 problems.
 <!-- /gen -->
 The TLA+ model in `spec/Bourse.tla` covers limit orders, cancels and the hand-off between threads. It does not cover market orders, replaces or self-trade prevention, which only the tests and the fuzzer check. The model is a reading of the code, and code and model can agree on a mistake, which is the gap arXiv 2607.05076 describes.
 
@@ -143,7 +143,7 @@ A betting referee judges only results that arrive after that point and divides b
 - Rust for the engine, with no dependencies in the core crate. Prices are whole ticks and sizes whole lots, so there is no rounding anywhere.
 - Every structure is sized when the book is built: a price ladder, a slab of order slots and a fixed id table. A test proves two million orders allocate nothing.
 - A size cut at the same price keeps an order's place in the queue. Any other replace sends it to the back.
-- The reinforcement learning candidate was cut down to run on a laptop in minutes: a linear policy, evolution strategies instead of gradient methods, and an adversary that picks the worst of eight fixed market regimes each round.
+- The reinforcement learning candidate was cut down to run on one PC in minutes: a linear policy, evolution strategies instead of gradient methods, and an adversary that picks the worst of eight fixed market regimes each round.
 - The planted cheat's strength was chosen by looking at one test day, which is allowed only because it is a cheat.
 
 ## Run it
