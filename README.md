@@ -50,7 +50,7 @@ The engine promises five things after every order: the best buying price stays b
 | Check | What it tried | Result |
 |---|---|---|
 | Property tests against the Python reference book | 3,000 random order streams per run | all match |
-| Differential fuzzing against the same reference | 3.3 hours, 0.89 billion orders | 0 disagreements or broken rules |
+| Differential fuzzing against the same reference | 3.7 hours, 0.97 billion orders | 0 disagreements or broken rules |
 | TLA+ model of the order life and the hand-off | 541,993 distinct states | no rule broken |
 | Same model, tail published before the slot is written | planted bug | caught (HandoffExact) |
 | Same model, new orders put at the front | planted bug | caught (FifoWithinLevel) |
@@ -58,14 +58,14 @@ The engine promises five things after every order: the best buying price stays b
 <!-- /gen -->
 
 <!-- gen:fuzz-summary -->
-The 24-hour fuzz run is still running. So far it has checked 0.89 billion orders over 3.3 hours. It found 0 problems.
+The 24-hour fuzz run is still running. So far it has checked 0.97 billion orders over 3.7 hours. It found 0 problems.
 <!-- /gen -->
 The TLA+ model in `spec/Bourse.tla` covers limit orders, cancels and the hand-off between threads. It does not cover market orders, replaces or self-trade prevention, which only the tests and the fuzzer check. The model is a reading of the code, and code and model can agree on a mistake, which is the gap arXiv 2607.05076 describes.
 
 ## Real data
 
 <!-- gen:data-summary -->
-The engine's book matched Binance's own snapshot in 27 of 27 checks, on the top 20 price levels each side. That covered 27 minutes of recorded trading.
+The engine's book matched Binance's own snapshot in 238 of 238 checks, on the top 20 price levels each side. That covered 240 minutes of recorded trading.
 <!-- /gen -->
 LOBSTER's free samples now need an account, so the data is Binance's public ETHUSDT depth stream, recorded for four hours, plus seven days of its public trade archive.
 
@@ -93,13 +93,13 @@ Synthetic days built from these fits match the real ones on order rate, bursts, 
 <!-- gen:impact -->
 | How the order is sent | Exponent | 95% interval | Sizes used in the fit |
 |---|---|---|---|
-| split into 60 pieces | 0.82 | 0.73 to 0.97 | 6 of 8 |
-| split, refills do not follow the price | could not be fitted | | 0 of 8 |
+| split into 60 pieces | 0.96 | 0.82 to 1.26 | 6 of 8 |
+| split, refills do not follow the price | could not be fitted | | 1 of 8 |
 | one order | could not be fitted | | 0 of 8 |
 <!-- /gen -->
 
 <!-- gen:impact-summary -->
-When a large order was split into 60 pieces, the price moved by its size to the power 0.82, with a 95% interval from 0.73 to 0.97. The square-root law predicts 0.5, so this simulator does not reproduce it.
+When a large order was split into 60 pieces, the price moved by its size to the power 0.96, with a 95% interval from 0.82 to 1.26. The square-root law predicts 0.5, so this simulator does not reproduce it.
 <!-- /gen -->
 A likely reason is that new orders in the simulation arrive at a steady rate and do not rush in after the price moves, while arXiv 2607.04280 finds that this kind of refill is one of the two things the law needs. When refills were held at the old price, impact almost disappeared. A single order swept the visible book before it grew large enough to measure.
 
