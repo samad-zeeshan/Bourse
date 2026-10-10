@@ -48,30 +48,40 @@ function tapeLine() {
   const s = R.strategies;
   const anyProfit = Object.entries(s).some(([k, v]) => v.leak === "clean" && v.ci[0] > 0);
   document.getElementById("tape").innerHTML =
-    `99 in 100 orders in <b>${R.latency.p99} ns</b> · <b>${r2(R.latency.single_mps / 1e6)} million</b> orders a second · ` +
-    `<b>${R.fuzz.violations + R.fuzz.reference_diffs}</b> fuzz findings · ` +
+    `99 in 100 orders handled within <b>${R.latency.p99} nanoseconds</b>, inside the 1,000 goal · ` +
+    `<b>${r2(R.latency.single_mps / 1e6)} million</b> orders a second on one core · ` +
+    `<b>${R.fuzz.violations + R.fuzz.reference_diffs}</b> faults found in <b>${r2(R.fuzz.commands / 1e9)} billion</b> random orders · ` +
     (anyProfit ? "a robot made money" : "no honest robot made money");
 }
 
 function facts() {
   const dl = document.getElementById("facts");
   const f = R.fuzz, s = R.strategies;
+  const rl = s.rl_adversarial, tb = s.avellaneda_stoikov;
+  // The verdict is worked out from the data so it stays true if the results are rerun.
+  const robots = rl.pnl < 0 && tb.pnl < 0
+    ? `Both robots lost money on days they had not seen. The trained one lost ${rl.pnl < tb.pnl ? "more" : "less"}.`
+    : "At least one robot made money on days it had not seen.";
   const rows = [
     ["Half of all orders were handled within", `${R.latency.p50} ns`],
-    ["99 in 100 orders were handled within, against a goal of 1,000 ns", `${R.latency.p99} ns`],
-    ["One thread handled this many orders a second, against a goal of one million", `${r2(R.latency.single_mps / 1e6)} million`],
+    ["99 in 100 orders were handled within this time. The goal was 1,000 ns.", `${R.latency.p99} ns`],
+    ["One processor core handled this many orders a second. The goal was one million.", `${r2(R.latency.single_mps / 1e6)} million`],
     ["The same orders replayed in separate runs gave identical output in", `${R.determinism.runs} of ${R.determinism.runs}`],
-    [`Random orders checked against a slow reference book over ${r2(f.hours)} hours`, `${r2(f.commands / 1e9)} billion`],
+    [`Random orders checked against a simple, slow copy of the exchange over ${r2(f.hours)} hours`, `${r2(f.commands / 1e9)} billion`],
     ["Disagreements or broken rules found in all that checking", `${f.violations + f.reference_diffs}`],
-    ["The engine's book matched Binance's own snapshot in", `${R.reconstruction.snapshots_matching} of ${R.reconstruction.snapshots_compared}`],
-    ["Price impact grew with order size to the power, where theory says 0.5", `${R.impact.delta.toFixed(2)}`, true],
-    ["The trained robot's profit per hour on unseen days, in USDT", `${s.rl_adversarial.pnl.toFixed(2)}`, s.rl_adversarial.pnl < 0],
-    ["The textbook robot's profit per hour on the same days, in USDT", `${s.avellaneda_stoikov.pnl.toFixed(2)}`, s.avellaneda_stoikov.pnl < 0],
-    ["Settings tried and logged before anything was judged", `${R.register}`],
+    ["The exchange's waiting orders matched Binance's own list in", `${R.reconstruction.snapshots_matching} of ${R.reconstruction.snapshots_compared}`],
+    ["How steeply prices moved as orders grew. Theory expects 0.5.", `${R.impact.delta.toFixed(2)}`, true,
+      "Prices moved almost in a straight line with size, about twice as steeply as theory expects."],
+    ["The trained robot's profit per hour on days it had not seen", `${rl.pnl.toFixed(2)}`, rl.pnl < 0, null, "RL"],
+    ["The textbook robot's profit per hour on the same days", `${tb.pnl.toFixed(2)}`, tb.pnl < 0, robots, "Avellaneda-Stoikov"],
+    ["Settings tried and logged before anything was judged", `${R.register}`, false,
+      "Every attempt is on record, not only the winners."],
   ];
   dl.innerHTML = "";
-  for (const [k, v, bad] of rows) {
+  for (const [k, v, bad, note, tag] of rows) {
     const dt = document.createElement("dt"); dt.textContent = k;
+    if (tag) { const t = document.createElement("span"); t.className = "tag"; t.textContent = tag; dt.append(t); }
+    if (note) { const n = document.createElement("span"); n.className = "note"; n.textContent = note; dt.append(n); }
     const dd = document.createElement("dd"); dd.textContent = v; if (bad) dd.className = "bad";
     dl.append(dt, dd);
   }
@@ -110,7 +120,8 @@ function drawBook(eng, clock, events, crossed) {
   el("text", { x: W - 12, y: 14, "text-anchor": "end" }, "sellers waiting");
   el("text", { x: W - 12, y: H - 6, "text-anchor": "end" }, "buyers waiting");
   const m = Math.floor(clock / 60000), s = Math.floor(clock / 1000) % 60;
-  readout.innerHTML = `clock <b>${m}:${String(s).padStart(2, "0")}</b> · events <b>${fmt(events)}</b> · crossed book <b>${crossed ? "yes" : "never"}</b>`;
+  readout.innerHTML = `market time <b>${m}:${String(s).padStart(2, "0")}</b> · changes applied <b>${fmt(events)}</b> · ` +
+    (crossed ? `<b class="warn">a buyer priced above a seller</b>` : "buyers never priced above sellers");
 }
 
 function sameLevels(eng, check) {
@@ -123,8 +134,8 @@ function sameLevels(eng, check) {
 async function showReplay() {
   const me = ++run;
   title.textContent = "Replay the book";
-  caption.textContent = "Three minutes of Binance's ETHUSDT order book, played at ten times speed through the engine running in this page. " +
-    "Yellow bars are buyers waiting, grey bars are sellers. Whenever Binance published a full snapshot, the page compares it with the engine's book.";
+  caption.textContent = "Three minutes of real orders for Ether, a cryptocurrency, from the Binance exchange. They play at ten times speed through the exchange running inside this page. " +
+    "Yellow bars are buyers waiting, grey bars are sellers. Whenever Binance published its full list of waiting orders, the page checks this exchange's list against it.";
   let mod;
   try {
     mod = await loadEngine();
@@ -151,7 +162,7 @@ async function showReplay() {
         seen++;
         const ok = sameLevels(eng, c);
         matched += ok;
-        showStamp(ok ? `Matches Binance, all 40 levels (${matched} of ${seen})` : "Differs from Binance", ok);
+        showStamp(ok ? `Matches Binance at all 40 prices (${matched} of ${seen})` : "Differs from Binance", ok);
         setTimeout(() => { if (me === run) stamp.hidden = true; }, 2200);
       }
       i++;
@@ -159,7 +170,8 @@ async function showReplay() {
     const last = replay.batches[Math.min(i, replay.batches.length) - 1];
     drawBook(eng, last ? last.t : 0, eng.events(), crossed);
     if (i < replay.batches.length) requestAnimationFrame(step);
-    else caption.textContent = `The replay applied ${fmt(replay.batches.length)} batches of changes. The engine's book matched Binance's snapshot ${matched} of ${seen} times it was checked, and it was never crossed.`;
+    else caption.textContent = `The replay applied ${fmt(replay.batches.length)} batches of changes. The exchange matched Binance's own list ${matched} of ${seen} times it was checked. ` +
+      (crossed ? "At one point a buyer priced above a seller, which should never happen." : "Buyers never priced above sellers, as it should be.");
   };
   requestAnimationFrame(step);
 }
@@ -171,8 +183,9 @@ function showLatency() {
   title.textContent = "Time each order";
   const L = R.latency, edges = L.hist.edges_ns, counts = L.hist.counts;
   readout.innerHTML = `orders timed <b>${r2(L.samples / 1e6)} million</b>`;
-  caption.textContent = `Half of all orders were handled in ${L.p50} nanoseconds or less, and 99 in 100 in ${L.p99} or less. ` +
-    `The goal was one microsecond, so this is well inside it. It was measured on a ${L.cpu.replace(" 6-Core Processor", "")} Windows PC with nothing isolated, so treat it as a guide.`;
+  caption.textContent = `Half of all orders were handled in ${L.p50} nanoseconds or less. 99 in 100 took ${L.p99} or less. ` +
+    `The goal was 1,000 nanoseconds, a millionth of a second, so the exchange is well inside it. ` +
+    `It was measured on a ${L.cpu.replace(" 6-Core Processor", "")} Windows PC with other programs still running, so treat it as a guide.`;
   clear();
   const x0 = 50, x1 = W - 20, y0 = H - 40, y1 = 20;
   const lo = Math.log2(edges[0]), hi = Math.log2(edges[edges.length - 1]);
@@ -189,14 +202,14 @@ function showLatency() {
   });
   for (const ns of [10, 100, 1000, 10000, 100000]) {
     if (ns < edges[0] || ns > edges[edges.length - 1]) continue;
-    el("text", { x: xs(ns), y: y0 + 18, "text-anchor": "middle" }, ns >= 1000 ? `${ns / 1000} µs` : `${ns} ns`);
+    el("text", { x: xs(ns), y: y0 + 18, "text-anchor": "middle" }, `${fmt(ns)} ns`);
   }
   // Labels step down so the three markers, which sit close together, never overlap.
   [["half", L.p50], ["99 in 100", L.p99], ["999 in 1,000", L.p999]].forEach(([label, v], k) => {
     el("line", { x1: xs(v), x2: xs(v), y1: y1 + k * 18, y2: y0, class: "mark" });
     el("text", { x: xs(v) + 6, y: y1 + 12 + k * 18, class: "label" }, `${label}: ${v} ns`);
   });
-  el("text", { x: x1, y: y0 + 34, "text-anchor": "end" }, "time per order, log scale");
+  el("text", { x: x1, y: y0 + 34, "text-anchor": "end" }, "time per order, each step ten times longer");
 }
 
 // ---- Push the price --------------------------------------------------------------------------
@@ -205,10 +218,10 @@ function showImpact() {
   ++run;
   title.textContent = "Push the price";
   const I = R.impact, pts = I.points;
-  readout.innerHTML = `fitted power <b>${I.delta.toFixed(2)}</b> · 95% interval <b>${I.ci[0].toFixed(2)} to ${I.ci[1].toFixed(2)}</b>`;
+  readout.innerHTML = `steepness <b>${I.delta.toFixed(2)}</b>, likely between <b>${I.ci[0].toFixed(2)} and ${I.ci[1].toFixed(2)}</b> · theory expects <b>0.5</b>`;
   caption.textContent = `A big order was split into 60 pieces and sent into a simulated market built from Binance data. ` +
-    `Bigger orders moved the price more, and the move grew with size to the power ${I.delta.toFixed(2)}. ` +
-    `The square-root law says 0.5, shown dashed, so this simulated market moves too much for big orders and does not reproduce the law.`;
+    `Bigger orders moved the price more. The price moved almost in a straight line with order size, about twice as steeply as theory expects. ` +
+    `The dashed line is the square-root law that real markets tend to follow. This simulated market does not reproduce it, so it overstates what big orders cost.`;
   clear();
   const x0 = 60, x1 = W - 20, y0 = H - 40, y1 = 20;
   const lx = pts.map((p) => Math.log10(p.q_over_v)), ly = pts.map((p) => Math.log10(p.impact_over_sigma));
@@ -239,10 +252,18 @@ function showImpact() {
   }
   el("text", { x: x1, y: y0 + 34, "text-anchor": "end" }, "order size as a share of what traded meanwhile");
   el("text", { x: x0 + 6, y: y1 + 10 }, "price move, in normal ten-minute moves");
-  el("text", { x: X(b) - 4, y: Y(c5 * Math.sqrt(b)) + 16, "text-anchor": "end" }, "square-root law");
+  el("text", { x: X(b) - 4, y: Y(c5 * Math.sqrt(b)) + 16, "text-anchor": "end" }, "square-root law, what theory expects");
 }
 
 // ---- Sneak in a cheat ------------------------------------------------------------------------
+
+// Plain names for the chart. The names in results.json are the research names and show as a small tag.
+const PLAIN = {
+  avellaneda_stoikov: "Textbook robot",
+  multi_level: "Many-price robot",
+  rl_adversarial: "Trained robot",
+  leaky_oracle: "Planted cheat",
+};
 
 function showCheat() {
   const me = ++run;
@@ -250,13 +271,14 @@ function showCheat() {
   const S = R.strategies;
   const order = ["avellaneda_stoikov", "multi_level", "rl_adversarial", "leaky_oracle"];
   const cheat = S.leaky_oracle;
-  readout.innerHTML = `settings tried and logged <b>${R.register}</b>`;
+  readout.innerHTML = `settings tried, every one logged <b>${R.register}</b>`;
   const days = Math.round(cheat.cum.length / 24);
   const allLost = order.filter((k) => k !== "leaky_oracle").every((k) => S[k].pnl < 0);
-  caption.textContent = `Each robot traded ${days} days it had never seen. ` +
-    (allLost ? "Every honest one lost money, shown with its 95% interval. " : "The honest ones are shown with their 95% intervals. ") +
-    `The cheat made about ${r2(cheat.pnl)} USDT an hour because it could see five seconds ahead. ` +
-    `Its profit looks like skill to the statistics. The leakage check rewrites the future and sees its quotes change, so it is refused.`;
+  caption.textContent = `Each robot traded for ${days} days it had never seen. ` +
+    (allLost ? "Every honest robot lost money. " : "") +
+    `Each bar shows the range its hourly result most likely falls in. ` +
+    `A planted cheat made about ${r2(cheat.pnl)} dollars an hour because it could see five seconds ahead. ` +
+    `To the usual statistics that profit looks like skill. A second check changes the future prices, sees the cheat's orders change with them, and refuses it.`;
   clear();
   const x0 = narrow ? 150 : 190, x1 = W - 30, rowH = narrow ? 110 : 80, top = 40;
   const lo = Math.min(...order.map((k) => S[k].ci[0])) - 2, hi = Math.max(...order.map((k) => S[k].ci[1])) + 2;
@@ -267,17 +289,18 @@ function showCheat() {
     const s = S[k], y = top + i * rowH + 10;
     const isCheat = k === "leaky_oracle";
     const g = [];
-    g.push(el("text", { x: 10, y: y + 4, class: isCheat ? "label warn" : "label" }, s.name));
+    g.push(el("text", { x: 10, y: y + 4, class: isCheat ? "label warn" : "label" }, PLAIN[k]));
     g.push(el("line", { x1: X(s.ci[0]), x2: X(s.ci[1]), y1: y, y2: y, class: `ci ${isCheat ? "cheat" : "honest"}` }));
     g.push(el("circle", { cx: X(s.pnl), cy: y, r: 5, class: isCheat ? "" : "pt", fill: isCheat ? "var(--signal)" : undefined }));
     g.push(el("text", { x: X(s.pnl), y: y - 12, "text-anchor": "middle" }, `${s.pnl.toFixed(2)} an hour`));
     g.push(el("text", { x: 10, y: y + 22 }, isCheat ? "reads the future" : `grade ${Math.round(s.grade)} of 100`));
+    if (!isCheat) g.push(el("text", { x: 10, y: y + 38, class: "tag" }, s.name));
     if (isCheat && !reduced) {
       g.forEach((e) => { e.style.opacity = 0; });
       setTimeout(() => { if (me === run) g.forEach((e) => { e.style.transition = "opacity 400ms ease"; e.style.opacity = 1; }); }, 700);
     }
   });
-  el("text", { x: 10, y: H - 8 }, "profit per hour on unseen days, USDT");
+  el("text", { x: 10, y: H - 8 }, "profit per hour on days it had not seen, in dollars");
   setTimeout(() => { if (me === run) showStamp("Refused. It reads the next five seconds.", false, true); }, reduced ? 0 : 1500);
 }
 
@@ -290,6 +313,12 @@ function select(view) {
 }
 
 buttons.forEach((b) => b.addEventListener("click", () => select(b.dataset.view)));
+
+// The page turns light while the numbers section fills the middle of the screen, and dark again either side.
+// The tween is a CSS transition, so the reduced motion rule in style.css makes it instant.
+new IntersectionObserver(([e]) => document.body.classList.toggle("flip", e.isIntersecting), {
+  rootMargin: "-40% 0px -40% 0px",
+}).observe(document.getElementById("numbers"));
 
 (async () => {
   R = await (await fetch("data/results.json")).json();

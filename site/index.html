@@ -7,46 +7,60 @@
 <meta name="description" content="A small exchange and a trading robot, built to be checked rather than trusted.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800&family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<a class="source-pill" href="https://github.com/samad-zeeshan/Bourse">Source</a>
+
 <header class="top">
-  <h1>Bourse</h1>
+  <h1 class="wordmark">Bourse</h1>
   <p class="tape" id="tape" aria-label="Key numbers">loading the results</p>
 </header>
 
 <main>
   <section class="intro">
+    <p class="eyebrow"><span>01</span> What it is</p>
     <p>Bourse is a small stock exchange and a trading robot, built to be checked rather than trusted. The exchange matches buyers and sellers strictly by price and then by arrival time, never loses an order, and gives the same answer every time it sees the same orders. The robot tries to earn the gap between buying and selling prices, and is judged by tests that assume every profit is luck or cheating until shown otherwise.</p>
   </section>
 
-  <nav class="controls" aria-label="Demo">
-    <button type="button" data-view="replay" aria-pressed="true">Replay the book</button>
-    <button type="button" data-view="latency" aria-pressed="false">Time each order</button>
-    <button type="button" data-view="impact" aria-pressed="false">Push the price</button>
-    <button type="button" data-view="cheat" aria-pressed="false" class="surprise">Sneak in a cheat</button>
-  </nav>
+  <section class="demo">
+    <p class="eyebrow"><span>02</span> Try it</p>
+    <nav class="controls" aria-label="Demo">
+      <button type="button" data-view="replay" data-demo="replay" aria-pressed="true">Replay the book</button>
+      <button type="button" data-view="latency" data-demo="timing" aria-pressed="false">Time each order</button>
+      <button type="button" data-view="impact" data-demo="impact" aria-pressed="false">Push the price</button>
+      <button type="button" data-view="cheat" data-demo="cheat" aria-pressed="false" class="surprise">Sneak in a cheat</button>
+    </nav>
 
-  <section class="stage" aria-live="polite">
-    <div class="stage-head">
-      <h2 id="stage-title">Replay the book</h2>
-      <div class="readout" id="readout"></div>
+    <div class="stage" aria-live="polite">
+      <div class="stage-head">
+        <h2 id="stage-title">Replay the book</h2>
+        <div class="readout" id="readout"></div>
+      </div>
+      <svg id="chart" role="img" aria-labelledby="stage-title stage-caption" viewBox="0 0 800 420" preserveAspectRatio="xMidYMid meet"></svg>
+      <p class="caption" id="stage-caption"></p>
+      <div class="stamp" id="stamp" hidden></div>
     </div>
-    <svg id="chart" role="img" aria-labelledby="stage-title stage-caption" viewBox="0 0 800 420" preserveAspectRatio="xMidYMid meet"></svg>
-    <p class="caption" id="stage-caption"></p>
-    <div class="stamp" id="stamp" hidden></div>
   </section>
 
-  <section class="facts">
-    <h2>The numbers</h2>
+  <section class="facts" id="numbers">
+    <p class="eyebrow"><span>03</span> The numbers</p>
+    <h2>What the checks found</h2>
+    <p class="key">Times are in nanoseconds (ns), billionths of a second. Money is in dollars, held as USDT, a coin pegged to the dollar.</p>
     <dl id="facts"></dl>
   </section>
 </main>
 
-<footer>
-  <p>Order book data is Binance's public ETHUSDT depth stream and trade archive, used under Binance's terms. Speed was measured on one Windows PC with nothing isolated, so it is a guide, not a promise.</p>
-  <p><a href="https://github.com/samad-zeeshan/Bourse">Source and method on GitHub</a> · MIT licence</p>
+<footer class="coda">
+  <div class="coda-inner">
+    <p class="eyebrow"><span>04</span> Source</p>
+    <p class="voice">An exchange you can check, not one you have to trust.</p>
+    <p><a href="https://github.com/samad-zeeshan/Bourse">Code, tests and method on GitHub</a></p>
+    <p>The order data is Binance's public record of Ether orders and trades, used under Binance's terms. Speed was measured on one Windows PC with other programs still running, so it is a guide, not a promise.</p>
+    <p>MIT licence</p>
+  </div>
+  <p class="wordmark wordmark-foot" aria-hidden="true">Bourse</p>
 </footer>
 <script type="module" src="app.js"></script>
 </body>
