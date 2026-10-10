@@ -1,23 +1,25 @@
 # Bourse
 
-Bourse is a small stock exchange and a trading robot, built to be checked rather than trusted. The exchange matches buyers and sellers strictly by price and then by arrival time, never loses an order, and gives the same answer every time it sees the same orders. The robot tries to earn the gap between buying and selling prices. It is judged by tests that treat every profit as luck or cheating until shown otherwise, and none of the honest robots made money.
+Bourse is a small stock exchange and a robot that trades on it. Tests check both, so nobody has to trust them. The exchange matches buyers and sellers first by price and then by arrival time. It never loses an order. It gives the same answer every time it gets the same orders. The robot tries to earn the gap between the buy price and the sell price.
 
-**Demo:** [samad-zeeshan.github.io/Bourse](https://samad-zeeshan.github.io/Bourse/) replays three minutes of Binance's order book through the engine inside your browser, then shows its speed, a price impact experiment, and a cheating robot being caught. A 90-second walkthrough is in [docs/media/demo.mp4](docs/media/demo.mp4).
+Strict tests judge the robot. They treat every profit as luck or a cheat until the robot proves otherwise. None of the honest robots made money.
 
-![Bourse demo: the book replaying, order timing, price impact, and the cheat being refused](docs/media/demo.gif)
+**Demo:** [samad-zeeshan.github.io/Bourse](https://samad-zeeshan.github.io/Bourse/) replays three minutes of the Binance order book through the exchange in your browser. Then it shows the speed of the exchange, a test of price impact, and a cheat that the checks catch. A 90-second video is in [docs/media/demo.mp4](docs/media/demo.mp4).
+
+![The Bourse demo replays the order book, times each order, and catches a robot that cheats](docs/media/demo.gif)
 
 ## How it works
 
-- ![engine](docs/diagrams/engine.png) One thread owns the order book, and orders reach it and leave it through lock-free queues, so the output depends only on the input.
-- ![order life](docs/diagrams/lifecycle.png) An order is checked, matched against the best waiting prices, and then rests, fills, is cancelled or is replaced.
-- ![evaluation](docs/diagrams/evaluation.png) Each strategy is tuned on earlier days, tested once on the next day, and then judged by a leakage check and a referee that knows how many settings were tried.
+- ![Threads and queues of the exchange](docs/diagrams/engine.png) One thread owns the order book. Orders go in and come out through lock-free queues. So the output depends only on the input.
+- ![Life of an order](docs/diagrams/lifecycle.png) The exchange checks an order and matches it against the best open prices. Then the order rests or fills, or the trader cancels or replaces it.
+- ![How the tests judge a robot](docs/diagrams/evaluation.png) The test tunes each robot on earlier days and runs it once on the next day. Then a leakage check and a referee judge it. The referee knows how many settings the project tried.
 
-Each has an interactive version beside it in `docs/diagrams/`.
+Each diagram also has an interactive version in `docs/diagrams/`.
 
 ## Speed
 
 <!-- gen:speed -->
-| Engine | Machine | Median | 99th percentile | 99.9th percentile | Slowest | Orders per second |
+| Exchange | Machine | Median | 99th percentile | 99.9th percentile | Slowest | Orders per second |
 |---|---|---|---|---|---|---|
 | Bourse, matcher alone | AMD Ryzen 5 7600X3D, Windows PC | 40 ns | 180 ns | 280 ns | 54.4 µs | 42 million |
 | Bourse, three threads with queues | same | | | | | 25 million |
@@ -26,9 +28,9 @@ Each has an interactive version beside it in `docs/diagrams/`.
 <!-- /gen -->
 
 <!-- gen:speed-summary -->
-Half of all orders were handled in 40 nanoseconds or less, and 99 in 100 in 180 or less. That is under the one microsecond the project aimed for. One thread handled about 42 million orders a second, well above the goal of one million.
+Half of all orders took 40 nanoseconds or less. Out of every 100 orders, 99 took 180 nanoseconds or less. The goal was one microsecond, so both times are well inside it. One thread handled about 42 million orders a second. The goal was one million, so this is well above it.
 <!-- /gen -->
-Each order was timed alone with the processor's cycle counter, with no network or disk involved. The other engine's numbers include risk checks and queueing at a fixed offered rate on a tuned server, so they are a rough reference, not a fair race.
+The benchmark timed each order alone with the cycle counter of the processor. The test used no network and no disk. The numbers for the other exchange include risk checks and queues at a fixed rate on a tuned server. So they are a rough guide, not a fair race.
 
 <!-- gen:method -->
 | Setting | Value |
@@ -44,13 +46,19 @@ Each order was timed alone with the processor's cycle counter, with no network o
 
 ## Correctness
 
-The engine promises five things after every order: the best buying price stays below the best selling price, quantity is never created or lost, the best price trades first and the oldest order at that price before newer ones, a cancel removes exactly what was waiting, and every event carries a number one higher than the one before.
+After every order, the exchange keeps five promises:
+
+- The best buy price stays below the best sell price.
+- No quantity appears or disappears.
+- The best price trades first. At one price, the oldest order trades before newer ones.
+- A cancel removes exactly the open quantity of that order.
+- Each event carries a number one higher than the event before.
 
 <!-- gen:correctness -->
 | Check | What it tried | Result |
 |---|---|---|
-| Property tests against the Python reference book | 3,000 random order streams per run | all match |
-| Differential fuzzing against the same reference | 3.7 hours, 0.97 billion orders | 0 disagreements or broken rules |
+| Property tests against the Python reference copy | 3,000 random order streams per run | all match |
+| Fuzz run against the same reference copy | 5.5 hours, 1.5 billion orders | 0 disagreements or broken rules |
 | TLA+ model of the order life and the hand-off | 541,993 distinct states | no rule broken |
 | Same model, tail published before the slot is written | planted bug | caught (HandoffExact) |
 | Same model, new orders put at the front | planted bug | caught (FifoWithinLevel) |
@@ -58,23 +66,23 @@ The engine promises five things after every order: the best buying price stays b
 <!-- /gen -->
 
 <!-- gen:fuzz-summary -->
-The 24-hour fuzz run is still running. So far it has checked 0.97 billion orders over 3.7 hours. It found 0 problems.
+The fuzz run sent about 1.5 billion random orders to the exchange and to the reference copy. It found 0 problems, which is good news. The run stopped after about 5.5 hours, so it did not reach the 24 hours it aimed for. The shorter run gives less proof than planned.
 <!-- /gen -->
-The TLA+ model in `spec/Bourse.tla` covers limit orders, cancels and the hand-off between threads. It does not cover market orders, replaces or self-trade prevention, which only the tests and the fuzzer check. The model is a reading of the code, and code and model can agree on a mistake, which is the gap arXiv 2607.05076 describes.
+The TLA+ model in `spec/Bourse.tla` covers limit orders, cancels and the hand-off between threads. It does not cover market orders, replaces or self-trade prevention. Only the tests and the fuzz run check those. The author wrote the model from the code. So the code and the model can agree on the same mistake. The paper arXiv 2607.05076 describes this gap.
 
 ## Real data
 
 <!-- gen:data-summary -->
-The engine's book matched Binance's own snapshot in 238 of 238 checks, on the top 20 price levels each side. That covered 240 minutes of recorded trading.
+The order book of the exchange matched the Binance snapshot in 238 of 238 checks. Each check compared the top 20 prices on each side. The checks covered 240 minutes of recorded trades.
 <!-- /gen -->
-LOBSTER's free samples now need an account, so the data is Binance's public ETHUSDT depth stream, recorded for four hours, plus seven days of its public trade archive.
+The free LOBSTER samples now need an account. So the data comes from Binance instead. It is four hours of the public ETHUSDT depth stream, plus seven days of the public trade archive.
 
 ## Order flow and price impact
 
-Market orders arrive in bursts, and a Hawkes process, where each order makes the next one more likely for a while, fits them far better than constant rates do. The fit error below is the largest gap between the model's timing and the real timing, so smaller is better.
+Market orders arrive in bursts. A Hawkes process models this, because each order makes the next one more likely for a short time. It fits the real orders much better than constant rates. The fit error below is the largest gap between the order times of the model and the real order times. A smaller error is better.
 
 <!-- gen:flow -->
-| Day | Market orders in two hours | Self-excitation | Fit error, buys | Fit error, sells | Fit error with constant rates | Error using the day before |
+| Day | Market orders in two hours | Self-excitation | Fit error, buys | Fit error, sells | Fit error with constant rates | Error with the fit of the day before |
 |---|---|---|---|---|---|---|
 | 2026-09-18 | 80,621 | 0.87 | 0.068 | 0.035 | 0.56 | first day |
 | 2026-09-19 | 17,507 | 0.53 | 0.038 | 0.034 | 0.41 | 0.18 |
@@ -85,9 +93,17 @@ Market orders arrive in bursts, and a Hawkes process, where each order makes the
 | 2026-09-24 | 38,129 | 0.68 | 0.052 | 0.033 | 0.51 | 0.14 |
 <!-- /gen -->
 
-The fit gets worse when one day's model is used on the next day, but it stays well ahead of constant rates.
+The fit gets worse when the next day uses the model of the day before. But it stays much better than constant rates.
 <!-- gen:synthetic-summary -->
-Synthetic days built from these fits match the real ones on order rate, bursts, spread, book depth and volume traded. Prices in them move about 11 times less than real prices, because nothing in the simulation reacts to news.
+Synthetic days made from these fits match the real days on these measures:
+
+- order rate
+- bursts of orders
+- spread
+- book depth
+- volume traded
+
+But prices in them move about 11 times less than real prices. Nothing in the simulation reacts to news. This is a weak point of the simulator.
 <!-- /gen -->
 
 <!-- gen:impact -->
@@ -99,14 +115,14 @@ Synthetic days built from these fits match the real ones on order rate, bursts, 
 <!-- /gen -->
 
 <!-- gen:impact-summary -->
-When a large order was split into 60 pieces, the price moved by its size to the power 0.96, with a 95% interval from 0.82 to 1.26. The square-root law predicts 0.5, so this simulator does not reproduce it.
+The test split a large order into 60 pieces. The price moved by the size of the order to the power 0.96, with a 95% interval from 0.82 to 1.3. The square-root law predicts 0.5. So this simulator does not reproduce the law, which is a weak point.
 <!-- /gen -->
-A likely reason is that new orders in the simulation arrive at a steady rate and do not rush in after the price moves, while arXiv 2607.04280 finds that this kind of refill is one of the two things the law needs. When refills were held at the old price, impact almost disappeared. A single order swept the visible book before it grew large enough to measure.
+Here is a likely reason. In the simulation, new orders arrive at a steady rate and do not rush in after the price moves. The paper arXiv 2607.04280 finds that this kind of refill is one of two things the law needs. When the test held refills at the old price, the impact almost disappeared. A single large order took all of the visible book before its impact grew large enough to measure.
 
 ## Market making
 
 <!-- gen:strategies -->
-| Strategy | Profit per hour, USDT | 95% interval | Hourly Sharpe | Robustness grade | Chance it is luck, after the search | Leakage check |
+| Robot | Profit per hour, USDT | 95% interval | Hourly Sharpe | Robustness grade | Chance it is luck, after the search | Leakage check |
 |---|---|---|---|---|---|---|
 | Avellaneda-Stoikov | -3.23 | -4.81 to -1.93 | -0.58 | 20 of 100 | 1.00 | clean |
 | Multi-level | -27.64 | -34.46 to -21.58 | -1.09 | 20 of 100 | 1.00 | clean |
@@ -115,36 +131,42 @@ A likely reason is that new orders in the simulation arrive at a steady rate and
 <!-- /gen -->
 
 <!-- gen:strategy-summary -->
-No honest strategy made money once the test day came. The trained candidate lost 5.9 USDT an hour on average, and the Avellaneda-Stoikov baseline lost 3.2. The candidate did worse than the baseline by 2.7 USDT an hour, with an interval from -4.86 to -0.33. So it is worse, and the interval excludes zero. The planted cheat made 8.4 USDT an hour and passed the referee, but the leakage check refused it.
+No honest robot made money on the test days. The trained robot lost 5.9 USDT an hour on average. The textbook robot (Avellaneda-Stoikov) lost 3.2 USDT an hour.
+
+The trained robot did worse than the textbook robot by 2.7 USDT an hour. The 95% interval for this gap is -4.9 to -0.33. The interval does not include zero, so the trained robot is worse. The planted cheat made 8.4 USDT an hour and passed the referee. But the leakage check refused it.
 <!-- /gen -->
-A quote here fills only when a market order trades straight through its price, as if it were last in the queue. That makes every fill a sign that the price is moving against the robot, which is harsh but honest. The grade follows the recipe in arXiv 2608.23808 but not its calibration, so it ranks these strategies against each other and nothing else.
+In this test, a quote fills only when a market order trades through its price. This is as if the quote were always last in the queue. So every fill is a sign that the price moves against the robot. This rule is harsh, but it is honest. The grade follows the method in arXiv 2608.23808 but not its calibration. So the grade only ranks these robots against each other.
 <!-- gen:fee-summary -->
-With a fee of one hundredth of a percent on each fill, every strategy loses more. The cheat then loses too, 4.0 USDT an hour.
+A fee of one hundredth of a percent on each fill makes every robot lose more. The cheat then loses too, about 4.0 USDT an hour.
 <!-- /gen -->
 
 ## Research note
 
-**Hypothesis.** A market maker trained against a worst-case market earns more on unseen days than the Avellaneda-Stoikov formula.
+**Hypothesis.** A robot trained against a worst-case market earns more on new days than the Avellaneda-Stoikov formula.
 
-**Method.** Four rounds. Each round tunes every strategy on the days before a test day, picks one setting per strategy on the last of those days, and runs it once on the test day in 24 one-hour pieces.
+**Method.** The test has four rounds. Each round tunes every robot on the days before a test day. It picks one setting for each robot on the last of those days. Then it runs that setting once on the test day, in 24 parts of one hour each.
 <!-- gen:register-summary -->
-Every setting tried, 412 in all, is logged before any test result is seen.
+The project logged every setting it tried before it saw any test result. There were 412 settings in all.
 <!-- /gen -->
-A betting referee judges only results that arrive after that point and divides by the number of settings tried.
+A betting referee judges only the results that come after that point. It divides by the number of settings tried.
 
-**Result.** It does not. The candidate lost more than the baseline, and the difference excludes zero. No honest strategy earned money, and only the planted cheat looked profitable.
+**Result.** The hypothesis is false. The trained robot lost more than the textbook robot. The interval for the difference does not include zero. No honest robot made money. Only the planted cheat looked profitable.
 
-**What would break it.** The fill rule may be too strict. A quote that sometimes fills at the front of its queue could turn the baselines positive. Seven days of one symbol is a narrow sample, and the policy is a small linear one, not the paper's neural network.
+**What would break it.** The fill rule may be too strict. If a quote sometimes filled at the front of its queue, the textbook robots could make money. The sample is narrow, with seven days of one symbol. The policy is small and linear, but the paper uses a neural network.
 
-**What to test next.** Recorded queue positions from a full order-by-order feed, a policy with memory, and fees negative enough to pay a market maker for waiting.
+**What to test next.** The project can test three things next:
+
+- queue positions recorded from a full order-by-order feed
+- a policy with memory
+- negative fees, so that the exchange pays a market maker to wait
 
 ## Design decisions
 
-- Rust for the engine, with no dependencies in the core crate. Prices are whole ticks and sizes whole lots, so there is no rounding anywhere.
-- Every structure is sized when the book is built: a price ladder, a slab of order slots and a fixed id table. A test proves two million orders allocate nothing.
-- A size cut at the same price keeps an order's place in the queue. Any other replace sends it to the back.
-- The reinforcement learning candidate was cut down to run on one PC in minutes: a linear policy, evolution strategies instead of gradient methods, and an adversary that picks the worst of eight fixed market regimes each round.
-- The planted cheat's strength was chosen by looking at one test day, which is allowed only because it is a cheat.
+- The exchange is in Rust, and the core crate has no dependencies. Prices are whole ticks and sizes are whole lots. So the exchange never rounds a value.
+- The book sets the size of each structure when it starts. These are a price ladder, a slab of order slots and a fixed id table. A test proves that two million orders allocate no memory.
+- If a replace only cuts the size at the same price, the order keeps its place in the queue. Any other replace sends the order to the back.
+- The trained robot uses reinforcement learning, made small enough to train on one PC in minutes. It has a linear policy and uses evolution strategies instead of gradient methods. Each round, an adversary picks the worst of eight fixed market regimes.
+- The strength of the planted cheat came from a look at one test day. This is allowed only because the robot is a cheat.
 
 ## Run it
 
@@ -154,23 +176,23 @@ cargo run --release -p bench                      # timing on your machine, writ
 python eval/report.py --check                     # README and demo numbers match the result files
 ```
 
-The Python steps need `pip install -r requirements.txt`. `flow/calibrate.py`, `flow/sqrt_law.py` and `eval/mm/harness.py` rebuild the flow and strategy results, and `spec/check.py` reruns TLC.
+Run `pip install -r requirements.txt` before the Python steps. To rebuild the flow and robot results, run `flow/calibrate.py`, `flow/sqrt_law.py` and `eval/mm/harness.py`. To run TLC again, run `spec/check.py`.
 
 ## Papers
 
-- arXiv 2609.22785, Robust Market Making with Hawkes Order Flow and Price Impact. The flow model and the adversarial candidate.
-- arXiv 2608.13096, FlowLOB. Cited for synthetic order books, not reproduced.
-- arXiv 2608.19227, M3. Cited as another way to generate order flow, not reproduced.
-- arXiv 2607.04280, Order Splitting and Liquidity Replenishment and the square-root law. The impact experiment.
-- arXiv 2606.29556, Persona-Trained Monte Carlo. Cited for mixed traders, not built.
-- arXiv 2606.21784, KineticSim. Speed reference for market simulators.
-- arXiv 2608.18195, Multi-Level Market Making with Reinforcement Learning. The multi-level baseline.
-- arXiv 2606.25986, The Inference-Compute Frontier for order book prediction. Why the candidate stays small and fast.
-- arXiv 2608.27734, What survives honest evaluation? Leakage-safe splits, the planted cheat and search-aware deflation.
-- arXiv 2608.23808, The MinervaScore. The robustness grade.
-- arXiv 2609.27051, Propose, Don't Judge. The betting referee.
-- arXiv 2607.05076, Can Code Specify a System Precisely Enough to Formally Verify It? What the model covers and what it does not.
+- arXiv 2609.22785, Robust Market Making with Hawkes Order Flow and Price Impact. It gives the flow model and the adversarial robot.
+- arXiv 2608.13096, FlowLOB. The project cites it for synthetic order books and does not reproduce it.
+- arXiv 2608.19227, M3. The project cites it as another way to make order flow and does not reproduce it.
+- arXiv 2607.04280, Order Splitting and Liquidity Replenishment and the square-root law. It is the basis of the impact test.
+- arXiv 2606.29556, Persona-Trained Monte Carlo. The project cites it for mixed traders and does not build them.
+- arXiv 2606.21784, KineticSim. It gives a speed reference for market simulators.
+- arXiv 2608.18195, Multi-Level Market Making with Reinforcement Learning. It gives the multi-level robot.
+- arXiv 2606.25986, The Inference-Compute Frontier for order book prediction. It explains why the trained robot stays small and fast.
+- arXiv 2608.27734, What survives honest evaluation? It gives the leakage-safe splits, the planted cheat and the correction for the search.
+- arXiv 2608.23808, The MinervaScore. It gives the robustness grade.
+- arXiv 2609.27051, Propose, Don't Judge. It gives the betting referee.
+- arXiv 2607.05076, Can Code Specify a System Precisely Enough to Formally Verify It? It shows what the model covers and what it does not.
 
 ## Licence
 
-MIT, see [LICENSE](LICENSE). Binance market data is used under Binance's terms of use, and raw recordings are not redistributed.
+The code uses the MIT licence. See [LICENSE](LICENSE). The project uses Binance market data under the Binance terms of use. It does not share the raw recordings.

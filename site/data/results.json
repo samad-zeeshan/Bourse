@@ -151,8 +151,8 @@
   "commands": 5000000
  },
  "fuzz": {
-  "hours": 3.6666666666666665,
-  "commands": 968201375,
+  "hours": 5.5,
+  "commands": 1494835556,
   "violations": 0,
   "reference_diffs": 0,
   "finished": false

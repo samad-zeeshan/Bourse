@@ -56,7 +56,7 @@ def r2(v):
 
 def speed(b, pub, meth):
     p = b["per_order"]
-    rows = ["| Engine | Machine | Median | 99th percentile | 99.9th percentile | Slowest | Orders per second |",
+    rows = ["| Exchange | Machine | Median | 99th percentile | 99.9th percentile | Slowest | Orders per second |",
             "|---|---|---|---|---|---|---|",
             f"| Bourse, matcher alone | {meth['cpu'].replace(' 6-Core Processor', '')}, Windows PC | {p['p50_ns']} ns | {p['p99_ns']} ns | "
             f"{p['p999_ns']} ns | {n(p['max_ns'] / 1000, 1)} µs | {n(b['single_thread_orders_per_sec'] / 1e6, 0)} million |",
@@ -83,8 +83,8 @@ def method(meth):
 def correctness(spec, det, fz):
     runs = spec["runs"]
     rows = ["| Check | What it tried | Result |", "|---|---|---|",
-            f"| Property tests against the Python reference book | 3,000 random order streams per run | all match |",
-            f"| Differential fuzzing against the same reference | {r2(fz['hours'])} hours, {r2(fz['commands'] / 1e9)} billion orders | "
+            f"| Property tests against the Python reference copy | 3,000 random order streams per run | all match |",
+            f"| Fuzz run against the same reference copy | {r2(fz['hours'])} hours, {r2(fz['commands'] / 1e9)} billion orders | "
             f"{fz['violations'] + fz['reference_diffs']} disagreements or broken rules |",
             f"| TLA+ model of the order life and the hand-off | {n(runs['MCBourse']['distinct_states'])} distinct states | "
             f"{'no rule broken' if runs['MCBourse']['result'] == 'pass' else 'rule broken'} |",
@@ -96,7 +96,7 @@ def correctness(spec, det, fz):
 
 
 def flow_table(hw):
-    rows = ["| Day | Market orders in two hours | Self-excitation | Fit error, buys | Fit error, sells | Fit error with constant rates | Error using the day before |",
+    rows = ["| Day | Market orders in two hours | Self-excitation | Fit error, buys | Fit error, sells | Fit error with constant rates | Error with the fit of the day before |",
             "|---|---|---|---|---|---|---|"]
     for d in hw["days"]:
         oos = d.get("oos")
@@ -119,7 +119,7 @@ def impact_table(sq):
 
 
 def strat_table(mm):
-    rows = ["| Strategy | Profit per hour, USDT | 95% interval | Hourly Sharpe | Robustness grade | Chance it is luck, after the search | Leakage check |",
+    rows = ["| Robot | Profit per hour, USDT | 95% interval | Hourly Sharpe | Robustness grade | Chance it is luck, after the search | Leakage check |",
             "|---|---|---|---|---|---|---|"]
     for s in mm["strategies"].values():
         o = s["oos"]
@@ -135,33 +135,47 @@ def texts(b, det, fz, rec, hw, sq, syn, mm):
     rl = mm["strategies"]["rl_adversarial"]["oos"]
     av = mm["strategies"]["avellaneda_stoikov"]["oos"]
     cheat = mm["strategies"]["leaky_oracle"]
-    fz_state = "has finished" if fz["finished"] else "is still running"
+    found = fz["violations"] + fz["reference_diffs"]
+    # A log with no END line means the run stopped early. The generator cannot tell a live run from a dead one,
+    # and a claim that the run is still going goes stale the moment it stops.
+    if fz["finished"]:
+        fz_time = f"The run lasted its full {r2(fz['hours'])} hours."
+    else:
+        fz_time = (f"The run stopped after about {r2(fz['hours'])} hours, so it did not reach the 24 hours it aimed for. "
+                   "The shorter run gives less proof than planned.")
+    if mm["verdict"]["candidate_beats_avellaneda_stoikov"]:
+        verdict = "The interval does not include zero, so the trained robot is better."
+    elif cmp_["ci95"][1] < 0:
+        verdict = "The interval does not include zero, so the trained robot is worse."
+    else:
+        verdict = "The interval includes zero, so the test does not show that the trained robot is better."
     return {
-        "speed-summary": f"Half of all orders were handled in {b['per_order']['p50_ns']} nanoseconds or less, and 99 in 100 in "
-                         f"{b['per_order']['p99_ns']} or less. That is under the one microsecond the project aimed for. "
-                         f"One thread handled about {r2(b['single_thread_orders_per_sec'] / 1e6)} million orders a second, "
-                         f"well above the goal of one million.",
-        "fuzz-summary": f"The 24-hour fuzz run {fz_state}. So far it has checked {r2(fz['commands'] / 1e9)} billion orders over "
-                        f"{r2(fz['hours'])} hours. It found {fz['violations'] + fz['reference_diffs']} problems.",
-        "data-summary": f"The engine's book matched Binance's own snapshot in {rec['snapshots_matching']} of "
-                        f"{rec['snapshots_compared']} checks, on the top {rec['levels_compared_per_side']} price levels each side. "
-                        f"That covered {r2(rec['minutes'])} minutes of recorded trading.",
-        "impact-summary": f"When a large order was split into 60 pieces, the price moved by its size to the power "
-                          f"{split['delta']:.2f}, with a 95% interval from {split['delta_ci95'][0]:.2f} to {split['delta_ci95'][1]:.2f}. "
-                          f"The square-root law predicts 0.5, so this simulator does not reproduce it.",
-        "strategy-summary": f"No honest strategy made money once the test day came. The trained candidate lost {r2(-rl['pnl_per_hour'])} USDT an hour "
-                            f"on average, and the Avellaneda-Stoikov baseline lost {r2(-av['pnl_per_hour'])}. "
-                            f"The candidate did {'better' if cmp_['mean_per_hour'] > 0 else 'worse'} than the baseline by "
-                            f"{r2(abs(cmp_['mean_per_hour']))} USDT an hour, with an interval from {cmp_['ci95'][0]:.2f} to {cmp_['ci95'][1]:.2f}. "
-                            + ("So it is better, and the interval excludes zero. " if mm['verdict']['candidate_beats_avellaneda_stoikov'] else
-                               "So it is worse, and the interval excludes zero. " if cmp_['ci95'][1] < 0 else "So it is not shown to be better. ")
-                            + f"The planted cheat made {r2(cheat['oos']['pnl_per_hour'])} USDT an hour and passed the referee, but the leakage check refused it.",
-        "fee-summary": f"With a fee of one hundredth of a percent on each fill, every strategy loses more. The cheat then loses too, "
-                       f"{r2(-cheat['oos']['pnl_per_hour_with_1bp_fee'])} USDT an hour.",
-        "synthetic-summary": f"Synthetic days built from these fits match the real ones on order rate, bursts, spread, book depth and volume traded. "
-                             f"Prices in them move about {r2(syn['price_move_per_minute_ticks']['real'] / syn['price_move_per_minute_ticks']['synthetic'])} "
-                             f"times less than real prices, because nothing in the simulation reacts to news.",
-        "register-summary": f"Every setting tried, {mm['register']['entries']} in all, is logged before any test result is seen.",
+        "speed-summary": f"Half of all orders took {b['per_order']['p50_ns']} nanoseconds or less. "
+                         f"Out of every 100 orders, 99 took {b['per_order']['p99_ns']} nanoseconds or less. "
+                         f"The goal was one microsecond, so both times are well inside it. "
+                         f"One thread handled about {r2(b['single_thread_orders_per_sec'] / 1e6)} million orders a second. "
+                         f"The goal was one million, so this is well above it.",
+        "fuzz-summary": f"The fuzz run sent about {r2(fz['commands'] / 1e9)} billion random orders to the exchange and to the reference copy. "
+                        f"It found {found} problems, which is {'good' if found == 0 else 'bad'} news. " + fz_time,
+        "data-summary": f"The order book of the exchange matched the Binance snapshot in {rec['snapshots_matching']} of "
+                        f"{rec['snapshots_compared']} checks. Each check compared the top {rec['levels_compared_per_side']} prices on each side. "
+                        f"The checks covered {r2(rec['minutes'])} minutes of recorded trades.",
+        "impact-summary": f"The test split a large order into 60 pieces. The price moved by the size of the order to the power "
+                          f"{split['delta']:.2f}, with a 95% interval from {r2(split['delta_ci95'][0])} to {r2(split['delta_ci95'][1])}. "
+                          f"The square-root law predicts 0.5. So this simulator does not reproduce the law, which is a weak point.",
+        "strategy-summary": f"No honest robot made money on the test days. The trained robot lost {r2(-rl['pnl_per_hour'])} USDT an hour on average. "
+                            f"The textbook robot (Avellaneda-Stoikov) lost {r2(-av['pnl_per_hour'])} USDT an hour.\n\n"
+                            f"The trained robot did {'better' if cmp_['mean_per_hour'] > 0 else 'worse'} than the textbook robot by "
+                            f"{r2(abs(cmp_['mean_per_hour']))} USDT an hour. The 95% interval for this gap is {r2(cmp_['ci95'][0])} to {r2(cmp_['ci95'][1])}. "
+                            f"{verdict} The planted cheat made {r2(cheat['oos']['pnl_per_hour'])} USDT an hour and passed the referee. "
+                            f"But the leakage check refused it.",
+        "fee-summary": f"A fee of one hundredth of a percent on each fill makes every robot lose more. The cheat then loses too, "
+                       f"about {r2(-cheat['oos']['pnl_per_hour_with_1bp_fee'])} USDT an hour.",
+        "synthetic-summary": "Synthetic days made from these fits match the real days on these measures:\n\n"
+                             "- order rate\n- bursts of orders\n- spread\n- book depth\n- volume traded\n\n"
+                             f"But prices in them move about {r2(syn['price_move_per_minute_ticks']['real'] / syn['price_move_per_minute_ticks']['synthetic'])} "
+                             f"times less than real prices. Nothing in the simulation reacts to news. This is a weak point of the simulator.",
+        "register-summary": f"The project logged every setting it tried before it saw any test result. There were {mm['register']['entries']} settings in all.",
     }
 
 
