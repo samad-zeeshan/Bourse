@@ -98,3 +98,16 @@ def test_no_em_dash_or_semicolon_in_prose():
     for name, text in (("README.md", readme_prose()), ("site", page_strings())):
         bad = [s.strip() for s in sentences(text) if "—" in s or ";" in s]
         assert not bad, f"{name}: em dash or semicolon: {bad}"
+
+
+# A form of "be" followed within one word by a past participle. It is rough, so real exceptions go in PASSIVE_OK.
+PASSIVE = re.compile(r"\b(?:is|are|was|were|be|been|being)\s+(?:\w+\s+)?(?:\w+ed|made|done|found|given|held|kept|left|"
+                     r"run|seen|sent|shown|taken|written|built|caught)\b", re.I)
+# Nothing needs an exception today. Add each full sentence here with a one-line reason comment.
+PASSIVE_OK: set[str] = set()
+
+
+def test_no_passive_voice():
+    for name, text in (("README.md", readme_prose()), ("site", page_strings())):
+        bad = [s.strip() for s in sentences(text) if PASSIVE.search(s) and s.strip() not in PASSIVE_OK]
+        assert not bad, f"{name}: passive voice: {bad}"
