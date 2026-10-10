@@ -58,8 +58,8 @@ def readme_prose():
     text = (ROOT / "README.md").read_text(encoding="utf-8")
     text = re.sub(r"```.*?```", "", text, flags=re.S)
     lines = [l for l in text.splitlines() if not l.lstrip().startswith("|") and not l.startswith("<!--")]
-    # Paper titles are proper names, so "Robust Market Making" stays as published.
-    lines = [re.sub(r"^(- arXiv \d{4}\.\d{5}, ).*?[.?] ", r"\1", l) for l in lines]
+    # Paper titles are proper names in italics, so "Robust Market Making" stays as published.
+    lines = [re.sub(r"(?<!\*)\*[^*]+\*(?!\*)", "TITLE", l) for l in lines]
     return "\n".join(lines)
 
 

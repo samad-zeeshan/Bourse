@@ -69,15 +69,14 @@ def speed(b, pub, meth):
 
 
 def method(meth):
-    rows = ["| Setting | Value |", "|---|---|",
-            f"| Processor | {meth['cpu']}, {meth['logical_cpus']} logical cores |",
-            f"| System | {meth['os']}, power plan {meth['power_plan'].split('(')[-1].rstrip(')')} |",
-            f"| Compiler | {meth['compiler']} |",
-            f"| Pinning | matcher on logical core {meth['matcher_cpu']}, time-critical priority, no core isolation |",
-            f"| Clock | processor time stamp counter, {meth['tsc_ticks_per_ns']:.2f} ticks per nanosecond |",
-            f"| Orders | {n(meth['warm_up_orders'])} to warm up, then {n(meth['measured_orders'])} timed one by one |",
-            f"| Timer cost | reported separately and not subtracted |"]
-    return "\n".join(rows)
+    plan = meth["power_plan"].split("(")[-1].rstrip(")")
+    return (f"The test PC had an {meth['cpu']} with {meth['logical_cpus']} logical cores. "
+            f"It ran {meth['os']} on the {plan} power plan. "
+            f"The compiler was {meth['compiler']}. "
+            f"The matcher ran on logical core {meth['matcher_cpu']} at time-critical priority with no core isolation, "
+            f"and the clock of the processor gave {meth['tsc_ticks_per_ns']:.2f} ticks per nanosecond. "
+            f"The test warmed up with {n(meth['warm_up_orders'])} orders, then timed {n(meth['measured_orders'])} orders one by one. "
+            "The cost of the timer shows separately, and the test does not subtract it.")
 
 
 def correctness(spec, det, fz):
@@ -88,7 +87,7 @@ def correctness(spec, det, fz):
             f"{fz['violations'] + fz['reference_diffs']} disagreements or broken rules |",
             f"| TLA+ model of the order life and the hand-off | {n(runs['MCBourse']['distinct_states'])} distinct states | "
             f"{'no rule broken' if runs['MCBourse']['result'] == 'pass' else 'rule broken'} |",
-            f"| Same model, tail published before the slot is written | planted bug | caught ({', '.join(runs['MCBoursePublishFirst']['violated'])}) |",
+            f"| Same model, tail moves before the slot holds the order | planted bug | caught ({', '.join(runs['MCBoursePublishFirst']['violated'])}) |",
             f"| Same model, new orders put at the front | planted bug | caught ({', '.join(runs['MCBourseLifo']['violated'])}) |",
             f"| Replay of {n(det['commands'])} orders in {len(det['runs'])} separate runs | Windows processes and a Linux container | "
             f"{'identical bytes' if det['all_identical'] else 'outputs differ'} |"]
@@ -111,7 +110,7 @@ def impact_table(sq):
     rows = ["| How the order is sent | Exponent | 95% interval | Sizes used in the fit |", "|---|---|---|---|"]
     for mode, a in sq["arms"].items():
         if a["delta"] is None:
-            rows.append(f"| {sq['labels'][mode]} | could not be fitted | | {a['points_used']} of {len(a['points'])} |")
+            rows.append(f"| {sq['labels'][mode]} | no fit possible | | {a['points_used']} of {len(a['points'])} |")
         else:
             rows.append(f"| {sq['labels'][mode]} | {a['delta']:.2f} | {a['delta_ci95'][0]:.2f} to {a['delta_ci95'][1]:.2f} | "
                         f"{a['points_used']} of {len(a['points'])} |")
@@ -163,18 +162,19 @@ def texts(b, det, fz, rec, hw, sq, syn, mm):
         "impact-summary": f"The test split a large order into 60 pieces. The price moved by the size of the order to the power "
                           f"{split['delta']:.2f}, with a 95% interval from {r2(split['delta_ci95'][0])} to {r2(split['delta_ci95'][1])}. "
                           f"The square-root law predicts 0.5. So this simulator does not reproduce the law, which is a weak point.",
-        "strategy-summary": f"No honest robot made money on the test days. The trained robot lost {r2(-rl['pnl_per_hour'])} USDT an hour on average. "
-                            f"The textbook robot (Avellaneda-Stoikov) lost {r2(-av['pnl_per_hour'])} USDT an hour.\n\n"
+        "strategy-summary": f"The trained robot lost {r2(-rl['pnl_per_hour'])} USDT an hour on average. "
+                            f"The textbook robot (Avellaneda-Stoikov) lost {r2(-av['pnl_per_hour'])} USDT an hour. "
                             f"The trained robot did {'better' if cmp_['mean_per_hour'] > 0 else 'worse'} than the textbook robot by "
                             f"{r2(abs(cmp_['mean_per_hour']))} USDT an hour. The 95% interval for this gap is {r2(cmp_['ci95'][0])} to {r2(cmp_['ci95'][1])}. "
-                            f"{verdict} The planted cheat made {r2(cheat['oos']['pnl_per_hour'])} USDT an hour and passed the referee. "
-                            f"But the leakage check refused it.",
+                            f"{verdict} The planted cheat made {r2(cheat['oos']['pnl_per_hour'])} USDT an hour and passed the referee, "
+                            f"but the leakage check refused it.",
         "fee-summary": f"A fee of one hundredth of a percent on each fill makes every robot lose more. The cheat then loses too, "
                        f"about {r2(-cheat['oos']['pnl_per_hour_with_1bp_fee'])} USDT an hour.",
-        "synthetic-summary": "Synthetic days made from these fits match the real days on these measures:\n\n"
-                             "- order rate\n- bursts of orders\n- spread\n- book depth\n- volume traded\n\n"
+        "synthetic-summary": "The fit gets worse when the next day uses the model of the day before, but it stays much better than constant rates. "
+                             "Synthetic days made from these fits match the real days on how often orders come and how they bunch up. "
+                             "They also match on spread, book depth and volume traded. "
                              f"But prices in them move about {r2(syn['price_move_per_minute_ticks']['real'] / syn['price_move_per_minute_ticks']['synthetic'])} "
-                             f"times less than real prices. Nothing in the simulation reacts to news. This is a weak point of the simulator.",
+                             "times less than real prices. Nothing in the simulation reacts to news. This is a weak point of the simulator.",
         "register-summary": f"The project logged every setting it tried before it saw any test result. There were {mm['register']['entries']} settings in all.",
     }
 
@@ -211,8 +211,13 @@ def render():
     rec, hw = load("eval/data/reconstruction.json"), load("eval/flow/hawkes.json")
     sq, syn, mm = load("eval/flow/sqrt_law.json"), load("eval/flow/synthetic_days.json"), load("eval/mm/results.json")
     fz = fuzz_log()
-    blocks = {"speed": speed(b, pub, meth), "method": method(meth), "correctness": correctness(spec, det, fz), "flow": flow_table(hw),
-              "impact": impact_table(sq), "strategies": strat_table(mm), **texts(b, det, fz, rec, hw, sq, syn, mm)}
+    t = texts(b, det, fz, rec, hw, sq, syn, mm)
+    # Each table shares a block with the summary under it, so the README stays short. The blank line ends the table.
+    blocks = {"speed": speed(b, pub, meth) + "\n\n" + t["speed-summary"], "method": method(meth),
+              "correctness": correctness(spec, det, fz) + "\n\n" + t["fuzz-summary"], "data-summary": t["data-summary"],
+              "flow": flow_table(hw) + "\n\n" + t["synthetic-summary"], "impact": impact_table(sq) + "\n\n" + t["impact-summary"],
+              "strategies": strat_table(mm) + "\n\n" + t["strategy-summary"] + "\n\n" + t["fee-summary"],
+              "register-summary": t["register-summary"]}
     data = site_data(b, meth, pub, det, fz, spec, rec, hw, sq, syn, mm)
     return blocks, json.dumps(data, indent=1) + "\n"
 
