@@ -3,6 +3,7 @@
 Bourse is a small stock exchange and a robot that trades on it. Tests check both, so nobody has to trust them. The exchange matches buyers and sellers first by price and then by arrival time. It never loses an order, and it gives the same answer every time it gets the same orders. The robot tries to earn the gap between the buy price and the sell price. Strict tests treat every profit as luck or a cheat, and none of the honest robots made money.
 
 **Demo:** [samad-zeeshan.github.io/Bourse](https://samad-zeeshan.github.io/Bourse/) replays three minutes of the Binance order book through the exchange in your browser. Then it shows the speed of the exchange, a test of price impact, and a cheat that the checks catch. A 90-second video is in [docs/media/demo.mp4](docs/media/demo.mp4).
+A 27-second explainer video is in [docs/media/explainer.mp4](docs/media/explainer.mp4).
 
 ![The Bourse demo replays the order book, times each order, and catches a robot that cheats](docs/media/demo.gif)
 
