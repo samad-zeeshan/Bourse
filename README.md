@@ -31,7 +31,7 @@ Half of all orders took 40 nanoseconds or less. Out of every 100 orders, 99 took
 <!-- /gen -->
 The benchmark timed each order alone with the cycle counter of the processor. The test used no network and no disk. The numbers for the other exchange include risk checks and queues at a fixed rate on a tuned server. So they are a rough guide, not a fair race.
 <!-- gen:method -->
-The test PC had an AMD Ryzen 5 7600X3D 6-Core Processor with 12 logical cores. It ran Microsoft Windows [Version 10.0.26200.9457] on the High performance power plan. The compiler was rustc 1.98.1 (48a229cea 2026-09-01), release profile, fat LTO, one codegen unit. The matcher ran on logical core 4 at time-critical priority with no core isolation, and the clock of the processor gave 4.10 ticks per nanosecond. The test warmed up with 2,000,000 orders, then timed 20,000,000 orders one by one. The cost of the timer shows separately, and the test does not subtract it.
+The test PC had an AMD Ryzen 5 7600X3D 6-Core Processor with 12 logical cores. It ran Microsoft Windows [Version 10.0.26200.9457] on the High performance power plan. The compiler was rustc 1.98.1 (48a229cea 2026-09-01), release profile, fat LTO, one codegen unit. The matcher ran on logical core 4 at time-critical priority. The test did not isolate that core. The clock of the processor gave 4.10 ticks per nanosecond. The test warmed up with 2,000,000 orders, then timed 20,000,000 orders one by one. The cost of the timer shows separately, and the test does not subtract it.
 <!-- /gen -->
 
 ## Correctness
@@ -67,7 +67,7 @@ Market orders arrive in bursts. A Hawkes process models this, because each order
 | 2026-09-23 | 51,276 | 0.73 | 0.037 | 0.038 | 0.61 | 0.06 |
 | 2026-09-24 | 38,129 | 0.68 | 0.052 | 0.033 | 0.51 | 0.14 |
 
-The fit gets worse when the next day uses the model of the day before, but it stays much better than constant rates. Synthetic days made from these fits match the real days on how often orders come and how they bunch up. They also match on spread, book depth and volume traded. But prices in them move about 11 times less than real prices. Nothing in the simulation reacts to news. This is a weak point of the simulator.
+The fit gets worse when the next day uses the model of the day before. It still stays much better than constant rates. Synthetic days made from these fits match the real days on how often orders come and how they bunch up. They also match on spread, book depth and volume traded. But prices in them move about 11 times less than real prices. Nothing in the simulation reacts to news. This is a weak point of the simulator.
 <!-- /gen -->
 <!-- gen:impact -->
 | How the order is sent | Exponent | 95% interval | Sizes used in the fit |
@@ -76,7 +76,7 @@ The fit gets worse when the next day uses the model of the day before, but it st
 | split, refills do not follow the price | no fit possible | | 1 of 8 |
 | one order | no fit possible | | 0 of 8 |
 
-The test split a large order into 60 pieces. The price moved by the size of the order to the power 0.96, with a 95% interval from 0.82 to 1.3. The square-root law predicts 0.5. So this simulator does not reproduce the law, which is a weak point.
+The test split a large order into 60 pieces. The test then measured how fast the price moves as the order grows. The measured exponent was 0.96, with a 95% interval from 0.82 to 1.3. The square-root law predicts 0.5. So this simulator does not reproduce the law, which is a weak point.
 <!-- /gen -->
 Here is a likely reason. In the simulation, new orders arrive at a steady rate and do not rush in after the price moves. The paper arXiv 2607.04280 finds that this kind of refill is one of two things the law needs. When the test held refills at the old price, the impact almost disappeared. A single large order took all of the visible book before its impact grew large enough to measure.
 
@@ -101,7 +101,7 @@ The project logged every setting it tried before it saw any test result. There w
 - **Method.** The test has four rounds. Each round tunes every robot on the days before a test day. It picks one setting for each robot on the last of those days. Then it runs that setting once on the test day, in 24 parts of one hour each. A betting referee judges only the results after that point, and it divides by the number of settings tried.
 - **Result.** The hypothesis is false, because the trained robot lost more than the textbook robot.
 - **What would break it.** The fill rule may be too strict. If a quote sometimes filled at the front of its queue, the textbook robots could make money. The sample is narrow, with seven days of one symbol. The policy is small and linear, but the paper uses a neural network.
-- **What to test next.** The project can test queue places from a feed of every order, a policy with memory, and fees that pay robots.
+- **What to test next.** The project can test queue places from a feed of every order. It can also test a policy with memory, and fees that pay robots.
 
 ## Run it
 ```
@@ -115,6 +115,6 @@ python eval/report.py --check                     # README and demo numbers matc
 ## Papers and licence
 - Order flow and impact. arXiv 2609.22785, *Robust Market Making with Hawkes Order Flow and Price Impact*, gives the flow model and the adversarial robot. arXiv 2607.04280, *Order Splitting and Liquidity Replenishment and the square-root law*, is the basis of the impact test. The project cites arXiv 2608.13096, *FlowLOB*, for synthetic order books and does not reproduce it. It cites arXiv 2608.19227, *M3*, as another way to make order flow and does not reproduce it. It cites arXiv 2606.29556, *Persona-Trained Monte Carlo*, for mixed traders and does not build them. arXiv 2606.21784, *KineticSim*, gives a speed reference for market simulators.
 - Robots and tests. arXiv 2608.18195, *Multi-Level Market Making with Reinforcement Learning*, gives the multi-level robot. arXiv 2606.25986, *The Inference-Compute Frontier*, explains why the trained robot stays small and fast. arXiv 2608.27734, *What survives honest evaluation?*, gives the leakage-safe splits, the planted cheat and the correction for the search. arXiv 2608.23808, *The MinervaScore*, gives the robustness grade. arXiv 2609.27051, *Propose, Don't Judge*, gives the betting referee.
-- Formal model. arXiv 2607.05076, *Can Code Specify a System Precisely Enough to Formally Verify It?*, shows what the model covers and what it does not.
+- Formal model. arXiv 2607.05076 shows what the model covers and what it does not. Its title is *Can Code Specify a System Precisely Enough to Formally Verify It?*
 
 The code uses the MIT licence. See [LICENSE](LICENSE). The project uses Binance market data under the Binance terms of use. It does not share the raw recordings.

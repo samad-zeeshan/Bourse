@@ -73,8 +73,9 @@ def method(meth):
     return (f"The test PC had an {meth['cpu']} with {meth['logical_cpus']} logical cores. "
             f"It ran {meth['os']} on the {plan} power plan. "
             f"The compiler was {meth['compiler']}. "
-            f"The matcher ran on logical core {meth['matcher_cpu']} at time-critical priority with no core isolation, "
-            f"and the clock of the processor gave {meth['tsc_ticks_per_ns']:.2f} ticks per nanosecond. "
+            f"The matcher ran on logical core {meth['matcher_cpu']} at time-critical priority. "
+            "The test did not isolate that core. "
+            f"The clock of the processor gave {meth['tsc_ticks_per_ns']:.2f} ticks per nanosecond. "
             f"The test warmed up with {n(meth['warm_up_orders'])} orders, then timed {n(meth['measured_orders'])} orders one by one. "
             "The cost of the timer shows separately, and the test does not subtract it.")
 
@@ -159,8 +160,8 @@ def texts(b, det, fz, rec, hw, sq, syn, mm):
         "data-summary": f"The order book of the exchange matched the Binance snapshot in {rec['snapshots_matching']} of "
                         f"{rec['snapshots_compared']} checks. Each check compared the top {rec['levels_compared_per_side']} prices on each side. "
                         f"The checks covered {r2(rec['minutes'])} minutes of recorded trades.",
-        "impact-summary": f"The test split a large order into 60 pieces. The price moved by the size of the order to the power "
-                          f"{split['delta']:.2f}, with a 95% interval from {r2(split['delta_ci95'][0])} to {r2(split['delta_ci95'][1])}. "
+        "impact-summary": f"The test split a large order into 60 pieces. The test then measured how fast the price moves as the order grows. "
+                          f"The measured exponent was {split['delta']:.2f}, with a 95% interval from {r2(split['delta_ci95'][0])} to {r2(split['delta_ci95'][1])}. "
                           f"The square-root law predicts 0.5. So this simulator does not reproduce the law, which is a weak point.",
         "strategy-summary": f"The trained robot lost {r2(-rl['pnl_per_hour'])} USDT an hour on average. "
                             f"The textbook robot (Avellaneda-Stoikov) lost {r2(-av['pnl_per_hour'])} USDT an hour. "
@@ -170,7 +171,7 @@ def texts(b, det, fz, rec, hw, sq, syn, mm):
                             f"but the leakage check refused it.",
         "fee-summary": f"A fee of one hundredth of a percent on each fill makes every robot lose more. The cheat then loses too, "
                        f"about {r2(-cheat['oos']['pnl_per_hour_with_1bp_fee'])} USDT an hour.",
-        "synthetic-summary": "The fit gets worse when the next day uses the model of the day before, but it stays much better than constant rates. "
+        "synthetic-summary": "The fit gets worse when the next day uses the model of the day before. It still stays much better than constant rates. "
                              "Synthetic days made from these fits match the real days on how often orders come and how they bunch up. "
                              "They also match on spread, book depth and volume traded. "
                              f"But prices in them move about {r2(syn['price_move_per_minute_ticks']['real'] / syn['price_move_per_minute_ticks']['synthetic'])} "
