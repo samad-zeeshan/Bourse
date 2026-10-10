@@ -48,10 +48,10 @@ function tapeLine() {
   const s = R.strategies;
   const anyProfit = Object.entries(s).some(([k, v]) => v.leak === "clean" && v.ci[0] > 0);
   document.getElementById("tape").innerHTML =
-    `99 in 100 orders handled within <b>${R.latency.p99} nanoseconds</b>, inside the 1,000 goal · ` +
-    `<b>${r2(R.latency.single_mps / 1e6)} million</b> orders a second on one core · ` +
-    `<b>${R.fuzz.violations + R.fuzz.reference_diffs}</b> faults found in <b>${r2(R.fuzz.commands / 1e9)} billion</b> random orders · ` +
-    (anyProfit ? "a robot made money" : "no honest robot made money");
+    `Out of every 100 orders, 99 took <b>${R.latency.p99} nanoseconds</b> or less, inside the goal of 1,000. · ` +
+    `One core handled <b>${r2(R.latency.single_mps / 1e6)} million</b> orders a second. · ` +
+    `Random tests found <b>${R.fuzz.violations + R.fuzz.reference_diffs}</b> faults in <b>${r2(R.fuzz.commands / 1e9)} billion</b> orders. · ` +
+    (anyProfit ? "A robot made money." : "No honest robot made money.");
 }
 
 function facts() {
@@ -62,19 +62,23 @@ function facts() {
   const robots = rl.pnl < 0 && tb.pnl < 0
     ? `Both robots lost money on days they had not seen. The trained one lost ${rl.pnl < tb.pnl ? "more" : "less"}.`
     : "At least one robot made money on days it had not seen.";
+  // A log with no END line means the run stopped early, so the page must not call it a full run.
+  const fuzzTime = f.finished
+    ? `The run lasted its full ${r2(f.hours)} hours.`
+    : `The run stopped after about ${r2(f.hours)} hours, short of its goal of 24.`;
   const rows = [
-    ["Half of all orders were handled within", `${R.latency.p50} ns`],
-    ["99 in 100 orders were handled within this time. The goal was 1,000 ns.", `${R.latency.p99} ns`],
-    ["One processor core handled this many orders a second. The goal was one million.", `${r2(R.latency.single_mps / 1e6)} million`],
-    ["The same orders replayed in separate runs gave identical output in", `${R.determinism.runs} of ${R.determinism.runs}`],
-    [`Random orders checked against a simple, slow copy of the exchange over ${r2(f.hours)} hours`, `${r2(f.commands / 1e9)} billion`],
-    ["Disagreements or broken rules found in all that checking", `${f.violations + f.reference_diffs}`],
-    ["The exchange's waiting orders matched Binance's own list in", `${R.reconstruction.snapshots_matching} of ${R.reconstruction.snapshots_compared}`],
-    ["How steeply prices moved as orders grew. Theory expects 0.5.", `${R.impact.delta.toFixed(2)}`, true,
-      "Prices moved almost in a straight line with size, about twice as steeply as theory expects."],
-    ["The trained robot's profit per hour on days it had not seen", `${rl.pnl.toFixed(2)}`, rl.pnl < 0, null, "RL"],
-    ["The textbook robot's profit per hour on the same days", `${tb.pnl.toFixed(2)}`, tb.pnl < 0, robots, "Avellaneda-Stoikov"],
-    ["Settings tried and logged before anything was judged", `${R.register}`, false,
+    ["Half of all orders took this long or less.", `${R.latency.p50} ns`],
+    ["Out of every 100 orders, 99 took this long or less. The goal was 1,000 ns, so this is good.", `${R.latency.p99} ns`],
+    ["One processor core handled this many orders a second. The goal was one million, so this is well above it.", `${r2(R.latency.single_mps / 1e6)} million`],
+    ["Separate replays of the same orders gave identical output in this many runs.", `${R.determinism.runs} of ${R.determinism.runs}`],
+    [`A fuzz run sent this many random orders to the exchange and to a slow, simple copy of it. ${fuzzTime}`, `${r2(f.commands / 1e9)} billion`],
+    ["The fuzz run found this many disagreements or broken rules.", `${f.violations + f.reference_diffs}`],
+    ["The open orders in this exchange matched the Binance list in this many checks.", `${R.reconstruction.snapshots_matching} of ${R.reconstruction.snapshots_compared}`],
+    ["This number shows how steeply prices moved as orders grew. Theory expects 0.5.", `${R.impact.delta.toFixed(2)}`, true,
+      "Prices moved almost in a straight line with size, about twice as steeply as theory expects. So the simulation does not match real markets here."],
+    ["This is the profit per hour of the trained robot on days it had not seen.", `${rl.pnl.toFixed(2)}`, rl.pnl < 0, null, "RL"],
+    ["This is the profit per hour of the textbook robot on the same days.", `${tb.pnl.toFixed(2)}`, tb.pnl < 0, robots, "Avellaneda-Stoikov"],
+    ["The project tried and logged this many settings before it judged any of them.", `${R.register}`, false,
       "Every attempt is on record, not only the winners."],
   ];
   dl.innerHTML = "";
@@ -117,11 +121,11 @@ function drawBook(eng, clock, events, crossed) {
   for (let i = 0; i < n; i++) row(asks, i, "ask", mid - (i + 1) * rowH);
   for (let i = 0; i < n; i++) row(bids, i, "bid", mid + i * rowH);
   el("line", { x1: x0 - 110, x2: W - 10, y1: mid, y2: mid, class: "axis" });
-  el("text", { x: W - 12, y: 14, "text-anchor": "end" }, "sellers waiting");
-  el("text", { x: W - 12, y: H - 6, "text-anchor": "end" }, "buyers waiting");
+  el("text", { x: W - 12, y: 14, "text-anchor": "end" }, "sell orders");
+  el("text", { x: W - 12, y: H - 6, "text-anchor": "end" }, "buy orders");
   const m = Math.floor(clock / 60000), s = Math.floor(clock / 1000) % 60;
-  readout.innerHTML = `market time <b>${m}:${String(s).padStart(2, "0")}</b> · changes applied <b>${fmt(events)}</b> · ` +
-    (crossed ? `<b class="warn">a buyer priced above a seller</b>` : "buyers never priced above sellers");
+  readout.innerHTML = `Market time <b>${m}:${String(s).padStart(2, "0")}</b> · Changes applied <b>${fmt(events)}</b> · ` +
+    (crossed ? `<b class="warn">A buyer priced above a seller.</b>` : "No buyer priced above a seller.");
 }
 
 function sameLevels(eng, check) {
@@ -134,14 +138,14 @@ function sameLevels(eng, check) {
 async function showReplay() {
   const me = ++run;
   title.textContent = "Replay the book";
-  caption.textContent = "Three minutes of real orders for Ether, a cryptocurrency, from the Binance exchange. They play at ten times speed through the exchange running inside this page. " +
-    "Yellow bars are buyers waiting, grey bars are sellers. Whenever Binance published its full list of waiting orders, the page checks this exchange's list against it.";
+  caption.textContent = "This shows three minutes of real orders for Ether, a cryptocurrency, from the Binance exchange. The orders play at ten times speed through the exchange in this page. " +
+    "Yellow bars are buy orders and grey bars are sell orders. Binance publishes its full list of open orders from time to time. Each time, the page checks this exchange against that list.";
   let mod;
   try {
     mod = await loadEngine();
     if (!replay) replay = await (await fetch("data/replay.json")).json();
   } catch (e) {
-    caption.textContent = "This browser could not start the engine, so the replay is unavailable. The recorded results below still apply.";
+    caption.textContent = "This browser could not start the exchange, so the replay cannot run. The recorded results below are still true.";
     return;
   }
   if (me !== run) return;
@@ -162,7 +166,7 @@ async function showReplay() {
         seen++;
         const ok = sameLevels(eng, c);
         matched += ok;
-        showStamp(ok ? `Matches Binance at all 40 prices (${matched} of ${seen})` : "Differs from Binance", ok);
+        showStamp(ok ? `The book matches Binance at all 40 prices (${matched} of ${seen}).` : "The book differs from Binance.", ok);
         setTimeout(() => { if (me === run) stamp.hidden = true; }, 2200);
       }
       i++;
@@ -170,8 +174,8 @@ async function showReplay() {
     const last = replay.batches[Math.min(i, replay.batches.length) - 1];
     drawBook(eng, last ? last.t : 0, eng.events(), crossed);
     if (i < replay.batches.length) requestAnimationFrame(step);
-    else caption.textContent = `The replay applied ${fmt(replay.batches.length)} batches of changes. The exchange matched Binance's own list ${matched} of ${seen} times it was checked. ` +
-      (crossed ? "At one point a buyer priced above a seller, which should never happen." : "Buyers never priced above sellers, as it should be.");
+    else caption.textContent = `The replay applied ${fmt(replay.batches.length)} batches of changes. The exchange matched the Binance list in ${matched} of ${seen} checks. ` +
+      (crossed ? "At one point, a buyer priced above a seller. This must never happen." : "No buyer ever priced above a seller, which is correct.");
   };
   requestAnimationFrame(step);
 }
@@ -182,10 +186,10 @@ function showLatency() {
   ++run;
   title.textContent = "Time each order";
   const L = R.latency, edges = L.hist.edges_ns, counts = L.hist.counts;
-  readout.innerHTML = `orders timed <b>${r2(L.samples / 1e6)} million</b>`;
-  caption.textContent = `Half of all orders were handled in ${L.p50} nanoseconds or less. 99 in 100 took ${L.p99} or less. ` +
-    `The goal was 1,000 nanoseconds, a millionth of a second, so the exchange is well inside it. ` +
-    `It was measured on a ${L.cpu.replace(" 6-Core Processor", "")} Windows PC with other programs still running, so treat it as a guide.`;
+  readout.innerHTML = `Orders timed <b>${r2(L.samples / 1e6)} million</b>`;
+  caption.textContent = `Half of all orders took ${L.p50} nanoseconds or less. Out of every 100 orders, 99 took ${L.p99} nanoseconds or less. ` +
+    `The goal was 1,000 nanoseconds, a millionth of a second. So the exchange is well inside the goal. ` +
+    `The test ran on a ${L.cpu.replace(" 6-Core Processor", "")} Windows PC while other programs ran too. So use these times as a guide only.`;
   clear();
   const x0 = 50, x1 = W - 20, y0 = H - 40, y1 = 20;
   const lo = Math.log2(edges[0]), hi = Math.log2(edges[edges.length - 1]);
@@ -218,10 +222,10 @@ function showImpact() {
   ++run;
   title.textContent = "Push the price";
   const I = R.impact, pts = I.points;
-  readout.innerHTML = `steepness <b>${I.delta.toFixed(2)}</b>, likely between <b>${I.ci[0].toFixed(2)} and ${I.ci[1].toFixed(2)}</b> · theory expects <b>0.5</b>`;
-  caption.textContent = `A big order was split into 60 pieces and sent into a simulated market built from Binance data. ` +
+  readout.innerHTML = `Steepness <b>${I.delta.toFixed(2)}</b> · Likely range <b>${I.ci[0].toFixed(2)} to ${I.ci[1].toFixed(2)}</b> · Theory expects <b>0.5</b>`;
+  caption.textContent = `The test split a big order into 60 pieces. It sent them into a simulated market made from Binance data. ` +
     `Bigger orders moved the price more. The price moved almost in a straight line with order size, about twice as steeply as theory expects. ` +
-    `The dashed line is the square-root law that real markets tend to follow. This simulated market does not reproduce it, so it overstates what big orders cost.`;
+    `The dashed line is the square-root law, which real markets usually follow. This simulated market does not follow it, so it shows big orders as too costly.`;
   clear();
   const x0 = 60, x1 = W - 20, y0 = H - 40, y1 = 20;
   const lx = pts.map((p) => Math.log10(p.q_over_v)), ly = pts.map((p) => Math.log10(p.impact_over_sigma));
@@ -267,24 +271,24 @@ const PLAIN = {
 
 function showCheat() {
   const me = ++run;
-  title.textContent = "Sneak in a cheat";
+  title.textContent = "Plant a cheat";
   const S = R.strategies;
   const order = ["avellaneda_stoikov", "multi_level", "rl_adversarial", "leaky_oracle"];
   const cheat = S.leaky_oracle;
-  readout.innerHTML = `settings tried, every one logged <b>${R.register}</b>`;
+  readout.innerHTML = `Settings tried and logged <b>${R.register}</b>`;
   const days = Math.round(cheat.cum.length / 24);
   const allLost = order.filter((k) => k !== "leaky_oracle").every((k) => S[k].pnl < 0);
-  caption.textContent = `Each robot traded for ${days} days it had never seen. ` +
+  caption.textContent = `Each robot traded for ${days} days that it had not seen. ` +
     (allLost ? "Every honest robot lost money. " : "") +
-    `Each bar shows the range its hourly result most likely falls in. ` +
-    `A planted cheat made about ${r2(cheat.pnl)} dollars an hour because it could see five seconds ahead. ` +
-    `To the usual statistics that profit looks like skill. A second check changes the future prices, sees the cheat's orders change with them, and refuses it.`;
+    `Each bar shows the likely range of its result per hour. ` +
+    `The planted cheat made about ${r2(cheat.pnl)} dollars an hour, because it could see five seconds ahead. ` +
+    `The usual statistics take that profit for skill. A second check changes the future prices, sees the orders of the cheat change too, and refuses it.`;
   clear();
   const x0 = narrow ? 150 : 190, x1 = W - 30, rowH = narrow ? 110 : 80, top = 40;
   const lo = Math.min(...order.map((k) => S[k].ci[0])) - 2, hi = Math.max(...order.map((k) => S[k].ci[1])) + 2;
   const X = (v) => x0 + ((v - lo) / (hi - lo)) * (x1 - x0);
   el("line", { x1: X(0), x2: X(0), y1: top - 20, y2: top + rowH * order.length - 20, class: "zero" });
-  el("text", { x: X(0), y: top - 26, "text-anchor": "middle" }, "breaks even");
+  el("text", { x: X(0), y: top - 26, "text-anchor": "middle" }, "no profit, no loss");
   order.forEach((k, i) => {
     const s = S[k], y = top + i * rowH + 10;
     const isCheat = k === "leaky_oracle";
@@ -301,7 +305,7 @@ function showCheat() {
     }
   });
   el("text", { x: 10, y: H - 8 }, "profit per hour on days it had not seen, in dollars");
-  setTimeout(() => { if (me === run) showStamp("Refused. It reads the next five seconds.", false, true); }, reduced ? 0 : 1500);
+  setTimeout(() => { if (me === run) showStamp("The check refused it. It reads the next five seconds.", false, true); }, reduced ? 0 : 1500);
 }
 
 const views = { replay: showReplay, latency: showLatency, impact: showImpact, cheat: showCheat };

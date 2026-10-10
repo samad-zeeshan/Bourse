@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Bourse</title>
-<meta name="description" content="A small exchange and a trading robot, built to be checked rather than trusted.">
+<meta name="description" content="Bourse is a small stock exchange and a robot that trades on it, and tests check both.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800&family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -15,13 +15,14 @@
 
 <header class="top">
   <h1 class="wordmark">Bourse</h1>
-  <p class="tape" id="tape" aria-label="Key numbers">loading the results</p>
+  <p class="tape" id="tape" aria-label="Key numbers">The results load here.</p>
 </header>
 
 <main>
   <section class="intro">
     <p class="eyebrow"><span>01</span> What it is</p>
-    <p>Bourse is a small stock exchange and a trading robot, built to be checked rather than trusted. The exchange matches buyers and sellers strictly by price and then by arrival time, never loses an order, and gives the same answer every time it sees the same orders. The robot tries to earn the gap between buying and selling prices, and is judged by tests that assume every profit is luck or cheating until shown otherwise.</p>
+    <p>Bourse is a small stock exchange and a robot that trades on it. Tests check both, so nobody has to trust them. The exchange matches buyers and sellers first by price and then by arrival time. It never loses an order. It gives the same answer every time it gets the same orders.</p>
+    <p>The robot tries to earn the gap between the buy price and the sell price. Strict tests judge the robot. They treat every profit as luck or a cheat until the robot proves otherwise.</p>
   </section>
 
   <section class="demo">
@@ -30,7 +31,7 @@
       <button type="button" data-view="replay" data-demo="replay" aria-pressed="true">Replay the book</button>
       <button type="button" data-view="latency" data-demo="timing" aria-pressed="false">Time each order</button>
       <button type="button" data-view="impact" data-demo="impact" aria-pressed="false">Push the price</button>
-      <button type="button" data-view="cheat" data-demo="cheat" aria-pressed="false" class="surprise">Sneak in a cheat</button>
+      <button type="button" data-view="cheat" data-demo="cheat" aria-pressed="false" class="surprise">Plant a cheat</button>
     </nav>
 
     <div class="stage" aria-live="polite">
@@ -47,7 +48,7 @@
   <section class="facts" id="numbers">
     <p class="eyebrow"><span>03</span> The numbers</p>
     <h2>What the checks found</h2>
-    <p class="key">Times are in nanoseconds (ns), billionths of a second. Money is in dollars, held as USDT, a coin pegged to the dollar.</p>
+    <p class="key">Times are in nanoseconds (ns). A nanosecond is a billionth of a second. Money is in dollars, held as USDT. USDT is a coin with a fixed dollar value.</p>
     <dl id="facts"></dl>
   </section>
 </main>
@@ -55,9 +56,9 @@
 <footer class="coda">
   <div class="coda-inner">
     <p class="eyebrow"><span>04</span> Source</p>
-    <p class="voice">An exchange you can check, not one you have to trust.</p>
-    <p><a href="https://github.com/samad-zeeshan/Bourse">Code, tests and method on GitHub</a></p>
-    <p>The order data is Binance's public record of Ether orders and trades, used under Binance's terms. Speed was measured on one Windows PC with other programs still running, so it is a guide, not a promise.</p>
+    <p class="voice">You can check this exchange, so you do not have to trust it.</p>
+    <p><a href="https://github.com/samad-zeeshan/Bourse">The code, tests and method are on GitHub.</a></p>
+    <p>The order data is the public Binance record of Ether orders and trades. The project uses it under the Binance terms. The speed test ran on one Windows PC while other programs ran too. So the speed is a guide, not a promise.</p>
     <p>MIT licence</p>
   </div>
   <p class="wordmark wordmark-foot" aria-hidden="true">Bourse</p>
